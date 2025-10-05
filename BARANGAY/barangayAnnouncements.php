@@ -24,13 +24,12 @@
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:system-ui,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      line-height:1.5;
-    }
-
+  body {
+  margin: 0;              /* prevent browser default margin */
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+}
     .layout{display:flex;min-height:100vh;}
     .main-content{
       flex:1;

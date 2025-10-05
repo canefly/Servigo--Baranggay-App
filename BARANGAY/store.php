@@ -17,7 +17,12 @@
       --sidebar-width:240px;
     }
     *{box-sizing:border-box;}
-    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif;background:var(--bg);color:var(--text);}
+    body {
+  margin: 0;              /* prevent browser default margin */
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+}
     .layout { display:flex; min-height:100vh; }
     .main-content { flex:1; padding:16px; transition:margin-left .3s ease; width:100%; }
     @media(min-width:1024px){ .main-content { margin-left: var(--sidebar-width); } }
@@ -112,6 +117,20 @@
       .dashboard-title{font-size:1.2rem;}
       .modal-grid{grid-template-columns:1fr;}
     }
+
+    /* Fix topbar shifting issue only for Store page */
+.topbar {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 55px;
+  z-index: 3000;
+}
+body {
+  padding-top: 55px; /* reserve topbar height */
+}
+
   </style>
 </head>
 <body>
