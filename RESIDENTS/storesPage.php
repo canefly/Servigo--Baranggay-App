@@ -86,7 +86,7 @@ footer{color:var(--muted);text-align:center;padding:20px 12px;font-size:14px}
 <?php include 'INCLUDES/topbar.php'; ?>
 <!-- Nav Tabs -->
 <nav class="navtabs">
-  <a href="residentsPage.php" class="tabbtn">Residents</a>
+  <a href="residentsPage.php" class="tabbtn">News</a>
   <a href="permitsPage.php" class="tabbtn">Permits</a>
   <a href="storesPage.php" class="tabbtn active">Stores</a>
 </nav>

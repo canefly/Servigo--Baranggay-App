@@ -137,7 +137,7 @@
 <?php include 'INCLUDES/topbar.php'; ?>
 
 <nav class="navtabs">
-  <a href="residentsPage.php" class="tabbtn">Residents</a>
+  <a href="residentsPage.php" class="tabbtn">News</a>
   <a href="permitsPage.php" class="tabbtn active">Permits</a>
   <a href="storesPage.php" class="tabbtn">Stores</a>
 </nav>
@@ -274,7 +274,6 @@ document.getElementById('applyForm').addEventListener('submit',async e=>{
     email: EMAIL || form.email.value,
     phone: form.phone.value,
     barangay_name: BARANGAY,
-    permit_type: form.permit_type.value,
     status: "Pending"
   };
   const res=await fetch(`${SUPABASE_URL}/rest/v1/barangay_clearance_requests`,{
