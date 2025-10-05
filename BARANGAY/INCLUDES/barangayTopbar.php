@@ -9,7 +9,7 @@
   --shadow: 0 2px 8px rgba(0,0,0,.08); --radius: 12px;
 }
 
-body { margin:0; font-family: system-ui, sans-serif; padding-top: 55px; background: var(--bg); }
+body { margin:0; font-family: system-ui, sans-serif; background: var(--bg); }
 
 .topbar {
   position: sticky; top: 0; z-index: 2000;
