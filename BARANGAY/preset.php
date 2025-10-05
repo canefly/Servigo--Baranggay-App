@@ -32,7 +32,6 @@
     /* Global baseline — prevents topbar shifts */
     body {
       margin: 0;
-      padding-top: var(--topbar-height); /* reserve space for fixed topbar */
       font-family: system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
