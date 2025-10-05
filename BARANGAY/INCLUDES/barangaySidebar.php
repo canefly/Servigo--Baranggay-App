@@ -50,14 +50,27 @@
   border-radius: var(--radius);
   color: var(--text); text-decoration: none;
   font-weight: 500;
-  transition: 0.2s;
+  transition: all 0.25s ease;
 }
-.sidebar-menu a:hover,
+
+/* Hover = subtle brand tint */
+.sidebar-menu a:hover {
+  background: rgba(4, 120, 87, 0.12);
+  color: var(--brand);
+}
+
+/* Active = vibrant Servigo gradient */
 .sidebar-menu a.active {
   background: linear-gradient(135deg, var(--brand), var(--accent));
   color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.sidebar-menu a.active i {
+  color: #fff;
 }
 
+/* Footer */
 .sidebar-footer {
   font-size: 13px;
   color: var(--muted);
@@ -66,7 +79,7 @@
   border-top: 1px solid var(--border);
 }
 
-/* Desktop */
+/* Desktop layout */
 @media (min-width: 1024px) {
   .sidebar {
     transform: none !important;
@@ -75,7 +88,7 @@
   .main-content { margin-left: 240px; padding: 20px; }
 }
 
-/* Mobile */
+/* Mobile layout */
 @media (max-width: 1023px) {
   .sidebar {
     width: 220px;
@@ -85,15 +98,16 @@
 }
 </style>
 
+
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
 
 <aside class="sidebar" id="sidebar">
   <nav class="sidebar-menu">
     <ul>
-      <li><a href="barangayAnnouncements.php" class="active"><i class='bx bx-list-plus'></i><span> Announcements</span></a></li>
+      <li><a href="barangayAnnouncements.php"><i class='bx bx-list-plus'></i><span> Announcements</span></a></li>
       <li><a href="verification.php"><i class='bx bx-id-card'></i><span> Verification Status</span></a></li>
       <li><a href="requests.php"><i class='bx bx-file'></i><span> Requests</span></a></li>
-      <li><a href="store.php"><i class='bx bx-cog'></i><span> store</span></a></li>
+      <li><a href="store.php"><i class='bx bx-cog'></i><span> Store</span></a></li>
       <li><a href="barangayLanding.php"><i class='bx bx-log-out'></i><span> Logout</span></a></li>
     </ul>
   </nav>
@@ -116,4 +130,17 @@ function toggleSidebar(force = null) {
     overlay.classList.add("active");
   }
 }
+
+// === Auto-detect current page and highlight active link ===
+(function() {
+  const currentPage = window.location.pathname.split("/").pop();
+  const links = document.querySelectorAll(".sidebar-menu a");
+
+  links.forEach(link => {
+    const href = link.getAttribute("href");
+    if (href === currentPage) {
+      link.classList.add("active");
+    }
+  });
+})();
 </script>

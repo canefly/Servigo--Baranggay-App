@@ -5,19 +5,19 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Resident Requests Dashboard</title>
+  <title>Local Services Management · Admin</title>
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet"/>
   <style>
     :root {
       --bg:#f5f7fa; --card:#ffffff;
       --text:#222; --muted:#6b7280; --border:#e5e7eb;
-      --brand:#047857; --accent:#10b981;
-      --pending:#f59e42; --declined:#ef4444; --ready:#0ea5e9; --completed:#16a34a;
+      --brand:#047857; --accent:#10b981; /* barangay-approved */
+      --pending:#f59e42; --declined:#ef4444; --ready:#0ea5e9; --completed:#16a34a; /* licensed=ready blue */
       --radius:14px; --shadow:0 2px 8px rgba(0,0,0,.08);
       --sidebar-width:240px;
     }
     *{box-sizing:border-box;}
-    body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);}
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif;background:var(--bg);color:var(--text);}
     .layout { display:flex; min-height:100vh; }
     .main-content { flex:1; padding:16px; transition:margin-left .3s ease; width:100%; }
     @media(min-width:1024px){ .main-content { margin-left: var(--sidebar-width); } }
@@ -31,88 +31,86 @@
     .dashboard-header-left{display:flex;align-items:center;gap:14px;}
     .dashboard-header img{height:48px;width:48px;border-radius:10px;object-fit:cover;}
     .dashboard-title{font-size:1.4rem;font-weight:700;color:var(--brand);}
-    .search-box{margin-left:auto;position:relative;}
-    .search-box input{
-      padding:8px 150px 8px 12px;border:1px solid var(--border);
-      border-radius:10px;font-size:.95rem;
-    }
-    .search-box i{
-      position:absolute;right:10px;top:50%;transform:translateY(-50%);
-      font-size:18px;color:var(--muted);
-    }
+    .subtle{color:var(--muted);font-size:.9rem;}
 
-    /* Tabs */
-    .filter-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
-    .filter-tab{
-      all:unset;cursor:pointer;padding:8px 18px;border-radius:999px;
-      font-weight:600;font-size:.95rem;
-      border:1px solid var(--border);background:#f3f4f6;color:var(--brand);
-      transition:.2s;
+    /* Filters Bar */
+    .filters-bar{
+      display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;
+      background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:12px 14px;margin-bottom:18px;
     }
-    .filter-tab.active{
-      background:linear-gradient(135deg,var(--brand),var(--accent));
-      color:#fff;border:none;box-shadow:0 2px 6px rgba(0,0,0,.1);
+    .filters-left,.filters-right{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .chip{
+      all:unset;cursor:pointer;padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:#f3f4f6;
+      font-weight:600;color:var(--text);font-size:.9rem;display:inline-flex;align-items:center;gap:6px;
     }
-
-    /* Requests grid */
-    .requests-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
-    .request-card{
-      background:var(--card);border:1px solid var(--border);
-      border-radius:var(--radius);box-shadow:var(--shadow);
-      padding:16px;display:flex;flex-direction:column;gap:10px;
-      transition:.2s;
+    .chip.active{background:var(--brand);border-color:var(--brand);color:#fff;}
+    .search{
+      position:relative;display:flex;align-items:center;
     }
-    .request-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.1);}
-    .request-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;}
-    .resident-name{font-weight:700;font-size:1.05rem;color:var(--text);}
-    .request-type{font-size:.85rem;font-weight:600;border-radius:12px;padding:4px 10px;background:#f3f4f6;color:var(--brand);}
-    .date-status-row{display:flex;justify-content:space-between;align-items:center;}
-    .submission-date{color:var(--muted);font-size:.85rem;}
-    .status-badge{padding:4px 12px;border-radius:999px;font-size:.8rem;font-weight:600;color:#fff;}
-    .status-pending{background:var(--pending);}
-    .status-declined{background:var(--declined);}
-    .status-ready{background:var(--ready);}
-    .status-completed{background:var(--completed);}
-
-    /* Actions */
-    .request-actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
-    .print-btn, .decline-btn, .view-btn, .complete-btn {
-      all:unset; cursor:pointer; display:flex; align-items:center; justify-content:center;
-      gap:6px; border-radius:12px; font-weight:700; font-size:.9rem; padding:7.5px 18px;
-      box-shadow:0 2px 8px rgba(30,64,175,.07); transition:.15s;
+    .search input{
+      padding:10px 38px 10px 12px;border:1px solid var(--border);border-radius:10px;min-width:260px;outline:none;
+      font-size:.95rem;background:#fff;
     }
-    .print-btn { background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff; }
-    .decline-btn { background:var(--declined);color:#fff; }
-    .view-btn { background:#f3f4f6;border:1px solid var(--border);color:var(--brand); }
-    .complete-btn { background:var(--completed);color:#fff; }
-    .print-btn:active, .decline-btn:active, .view-btn:active, .complete-btn:active { opacity:.92; }
+    .search i{position:absolute;right:10px;color:var(--muted);font-size:1.2rem;}
 
-    .no-requests{text-align:center;color:var(--muted);font-size:1rem;margin-top:30px;}
+    /* Grid + Cards */
+    .grid{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;
+    }
+    .card{
+      background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);
+      overflow:hidden;display:flex;flex-direction:column;transition:.18s;cursor:default;
+    }
+    .card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1);}
+    .thumb{width:100%;height:140px;object-fit:cover;background:#eef2f7;}
+    .body{padding:12px 14px;display:flex;flex-direction:column;gap:6px;}
+    .title{margin:0;font-size:1.05rem;font-weight:700;color:var(--brand);}
+    .meta{display:flex;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:.88rem;}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+    .badge{padding:4px 8px;border-radius:8px;font-size:.75rem;font-weight:700;color:#fff;display:inline-flex;gap:6px;align-items:center;}
+    .b-approved{background:var(--accent);}        /* 🏠 Barangay-Approved */
+    .b-licensed{background:var(--ready);}        /* 📄 Licensed Business */
+    .s-pending{background:var(--pending);}       /* ⏳ Pending */
+    .s-approved{background:var(--completed);}    /* ✅ Approved */
+    .s-declined{background:var(--declined);}     /* ❌ Declined */
 
-    /* Modals */
-    .modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:2000;background:rgba(0,0,0,.35);align-items:center;justify-content:center;}
+    .actions{
+      display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border);background:#fafafa;flex-wrap:wrap;
+    }
+    .btn{
+      all:unset;cursor:pointer;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;
+      font-weight:700;font-size:.9rem;display:inline-flex;align-items:center;gap:6px;
+    }
+    .btn.view{border-color:#d1d5db;}
+    .btn.approve{background:rgba(22,163,74,.1);border-color:#86efac;color:#166534;}
+    .btn.decline{background:rgba(239,68,68,.08);border-color:#fecaca;color:#991b1b;}
+    .btn.delete{background:#fff7f7;border-color:#fecaca;color:#991b1b;}
+
+    /* Reused Modal */
+    .modal-bg{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.35);align-items:center;justify-content:center;padding:16px;}
     .modal-bg.active{display:flex;}
-    .modal{background:#fff;border-radius:var(--radius);box-shadow:0 2px 12px rgba(0,0,0,.2);max-width:400px;width:95%;padding:20px;display:flex;flex-direction:column;gap:14px;}
-    .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
-    .modal-btn{all:unset;cursor:pointer;padding:8px 16px;border-radius:8px;font-weight:600;font-size:.9rem;}
-    .modal-btn.decline{background:var(--declined);color:#fff;}
-    .modal-btn.cancel{background:#f3f4f6;color:var(--text);}
-    .modal-error{color:var(--declined);font-size:.85rem;}
-
-    /* View Modal */
-    .view-modal{background:#fff;border-radius:var(--radius);box-shadow:0 2px 12px rgba(0,0,0,.2);max-width:600px;width:95%;padding:20px;display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow-y:auto;}
-    .view-row{display:flex;flex-wrap:wrap;gap:6px;font-size:.95rem;}
-    .view-label{font-weight:600;min-width:140px;color:var(--muted);}
-    .view-value{flex:1;}
-    .view-modal img{max-width:100%;border:1px solid var(--border);border-radius:10px;margin-top:4px;}
+    .modal{background:#fff;border-radius:16px;box-shadow:0 12px 28px rgba(0,0,0,.25);max-width:680px;width:100%;padding:18px;display:flex;flex-direction:column;gap:14px;}
+    .modal-head{display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--border);padding-bottom:10px;}
+    .modal-head .thumb{width:64px;height:64px;border-radius:10px;}
+    .modal-title{margin:0;font-size:1.2rem;font-weight:800;color:var(--brand);display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .modal-sub{color:var(--muted);font-size:.9rem;}
+    .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .modal-section{background:#fafafa;border:1px solid var(--border);border-radius:12px;padding:12px;}
+    .modal-section h4{margin:0 0 8px 0;font-size:.95rem;color:#111;}
+    .doc-list{display:flex;gap:10px;flex-wrap:wrap;}
+    .doc{width:100px;height:70px;border:1px solid var(--border);border-radius:8px;object-fit:cover;background:#fff;}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px;}
+    .modal-btn{all:unset;cursor:pointer;padding:9px 14px;border-radius:10px;font-weight:800;font-size:.92rem;}
+    .modal-btn.close{background:#f3f4f6;color:#111;border:1px solid var(--border);}
+    .modal-btn.approve{background:rgba(22,163,74,.12);color:#166534;border:1px solid #86efac;}
+    .modal-btn.decline{background:rgba(239,68,68,.1);color:#991b1b;border:1px solid #fecaca;}
 
     /* Small screens */
     @media(max-width:768px){
       .dashboard-header{flex-direction:column;align-items:flex-start;}
       .dashboard-title{font-size:1.2rem;}
-      .search-box{width:100%;}
-      .search-box input{width:100%;}
-      .print-btn,.decline-btn,.view-btn,.complete-btn{flex:1;}
+      .modal-grid{grid-template-columns:1fr;}
     }
   </style>
 </head>
@@ -123,341 +121,340 @@
       <div class="dashboard-header">
         <div class="dashboard-header-left">
           <img src="B.png" alt="Barangay Logo">
-          <div class="dashboard-title">Resident Requests Dashboard</div>
-        </div>
-        <div class="search-box">
-          <input type="text" id="searchInput" placeholder="Search requests...">
-          <i class='bx bx-search'></i>
+          <div>
+            <div class="dashboard-title">Local Services Management</div>
+            <div class="subtle">Review, verify, and maintain barangay-endorsed services.</div>
+          </div>
         </div>
       </div>
 
-      <nav class="filter-tabs">
-        <button class="filter-tab active" data-filter="all">All</button>
-        <button class="filter-tab" data-filter="completed">Completed (0)</button>
-        <button class="filter-tab" data-filter="declined">Declined (0)</button>
-        <button class="filter-tab" data-filter="Indigency">Indigency</button>
-        <button class="filter-tab" data-filter="Residency">Residency</button>
-        <button class="filter-tab" data-filter="Business Permit">Business Permit</button>
-      </nav>
-
-      <section id="requestsList" class="requests-list"></section>
-      <div id="noRequests" class="no-requests" style="display:none;">
-        <i class='bx bx-user-x' style="font-size:2rem;"></i><br>
-        No requests found for this category.
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="filters-left">
+          <!-- TYPE -->
+          <button class="chip chip-type active" data-type="all"><i class='bx bx-category'></i> All Types</button>
+          <button class="chip chip-type" data-type="barangay-approved"><i class='bx bx-home-smile'></i> Barangay-Approved</button>
+          <button class="chip chip-type" data-type="licensed"><i class='bx bx-receipt'></i> Licensed</button>
+          <!-- STATUS -->
+          <button class="chip chip-status active" data-status="all"><i class='bx bx-slider-alt'></i> All Status</button>
+          <button class="chip chip-status" data-status="pending"><i class='bx bx-time-five'></i> Pending</button>
+          <button class="chip chip-status" data-status="approved"><i class='bx bx-badge-check'></i> Approved</button>
+          <button class="chip chip-status" data-status="declined"><i class='bx bx-x-circle'></i> Declined</button>
+        </div>
+        <div class="filters-right">
+          <div class="search">
+            <input type="text" id="searchInput" placeholder="Search name, category, barangay...">
+            <i class='bx bx-search'></i>
+          </div>
+        </div>
       </div>
+
+      <!-- Grid -->
+      <div class="grid" id="servicesGrid"></div>
     </div>
   </main>
 </div>
 
-<!-- Decline Modal -->
+<!-- Reused Modal -->
 <div id="modalBg" class="modal-bg">
-  <form class="modal" id="declineModal">
-    <h3 style="margin:0;color:var(--brand)">Decline Request</h3>
-    <label for="declineReason">Reason for Decline <span style="color:var(--declined)">*</span></label>
-    <textarea id="declineReason" required placeholder="State the reason..."></textarea>
-    <div id="declineError" class="modal-error"></div>
-    <div class="modal-actions">
-      <button class="modal-btn decline" id="declineConfirmBtn">Decline</button>
-      <button class="modal-btn cancel" type="button" onclick="closeModal()">Cancel</button>
+  <div class="modal" id="serviceModal">
+    <div class="modal-head">
+      <img class="thumb" id="mThumb" src="" alt="">
+      <div>
+        <h3 class="modal-title" id="mTitle"></h3>
+        <div class="modal-sub" id="mSub"></div>
+      </div>
     </div>
-  </form>
-</div>
-
-<!-- View Modal -->
-<div id="viewModalBg" class="modal-bg">
-  <div class="view-modal" id="viewModal">
-    <h3>Resident Request Details</h3>
-    <div id="viewContent"></div>
-    <div class="modal-actions" style="margin-top:10px;">
-      <button class="modal-btn cancel" type="button" onclick="closeViewModal()">Close</button>
+    <div class="modal-grid">
+      <div class="modal-section">
+        <h4>Provider Details</h4>
+        <div id="mDetails"></div>
+      </div>
+      <div class="modal-section">
+        <h4>Uploaded Documents</h4>
+        <div class="doc-list" id="mDocs"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn decline" id="mDecline"><i class='bx bx-x-circle'></i> Decline</button>
+      <button class="modal-btn approve" id="mApprove"><i class='bx bx-badge-check'></i> Approve</button>
+      <button class="modal-btn close" onclick="closeModal()"><i class='bx bx-x'></i> Close</button>
     </div>
   </div>
 </div>
 
 <script>
-const BARANGAY_INFO = {
-  name: "Barangay Apolonio Samson",
-  address: "Ap. Samson Road, Quezon City, Metro Manila, Philippines",
-  captain: "Hon. LeBron James",
-  logo: "M.png",
-  bagongPilipinasLogo: "B.png"
-};
-
-const REQUESTS = [
-  { id: 1, fullname:"Jeremy Lin", civil_status:"Single", date_of_birth:"1990-05-12", house_street:"12 Sampaguita St.", city:"Quezon City", province:"NCR", date_of_residency:"2020-01-01", years_residency:5, purpose:"Scholarship requirement", valid_id_url:"https://via.placeholder.com/350x200.png?text=Valid+ID", email:"jeremy@example.com", phone:"09170000000", barangay_name:"Apolonio Samson", type:"Indigency", date:"2025-04-09", status:"Pending", reason:"" },
-  { id: 2, fullname:"Efren Reyes", civil_status:"Married", date_of_birth:"1985-01-05", house_street:"45 Sampaguita St.", city:"Quezon City", province:"NCR", date_of_residency:"2015-03-10", years_residency:10, purpose:"Proof of residency for employment", valid_id_url:"https://via.placeholder.com/350x200.png?text=Valid+ID", email:"efren@email.com", phone:"09171234567", barangay_name:"Apolonio Samson", type:"Residency", date:"2025-04-08", status:"Pending", reason:"" }
+/* ------------ SAMPLE DATA (Admin view) ------------ */
+const services = [
+  {
+    id: 'svc_001',
+    name: 'Fade Factory Barbershop',
+    type: 'fixed',                    // 'home' or 'fixed'
+    tag: 'licensed',                  // 'licensed' | 'barangay-approved'
+    status: 'approved',               // 'pending' | 'approved' | 'declined'
+    category: 'Barber',
+    barangay: 'San Isidro',
+    address: 'Purok 5, San Isidro',
+    openHours: 'Mon–Sun 8:00 AM – 9:00 PM',
+    contact: { phone: '0917 555 2234' },
+    thumb: 'https://images.unsplash.com/photo-1517832606299-7ae9b720a186?q=80&w=1200&auto=format&fit=crop',
+    docs: [
+      { label:'DTI Permit', url:'https://images.unsplash.com/photo-1523966211575-eb4a01e7dd51?q=80&w=600&auto=format&fit=crop' },
+      { label:'Barangay Clearance', url:'https://images.unsplash.com/photo-1584988299603-1eac9175b7d6?q=80&w=600&auto=format&fit=crop' },
+    ]
+  },
+  {
+    id: 'svc_002',
+    name: 'Mario Dela Cruz',
+    type: 'home',
+    tag: 'barangay-approved',
+    status: 'pending',
+    category: 'Electrician',
+    barangay: 'San Isidro',
+    address: 'Covers San Isidro & nearby puroks',
+    openHours: 'On-call (8:00 AM – 6:00 PM)',
+    contact: { phone: '0908 777 8899' },
+    thumb: 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?q=80&w=1200&auto=format&fit=crop',
+    docs: [
+      { label:'Valid ID', url:'https://images.unsplash.com/photo-1584433144859-1fc3ab64a957?q=80&w=600&auto=format&fit=crop' },
+      { label:'Proof of Residence', url:'https://images.unsplash.com/photo-1523419409543-8a99f4e72c2d?q=80&w=600&auto=format&fit=crop' },
+    ]
+  },
+  {
+    id: 'svc_003',
+    name: 'Liza’s Laundry Corner',
+    type: 'fixed',
+    tag: 'licensed',
+    status: 'declined',
+    category: 'Laundry',
+    barangay: 'San Jose',
+    address: 'Blk 12 Lot 9, San Jose',
+    openHours: 'Mon–Sat 9:00 AM – 7:00 PM',
+    contact: { phone: '0956 300 1020' },
+    thumb: 'https://images.unsplash.com/photo-1581579188871-c3696f44d2eb?q=80&w=1200&auto=format&fit=crop',
+    docs: [
+      { label:'BIR Registration', url:'https://images.unsplash.com/photo-1611162617271-4975fd0eac4b?q=80&w=600&auto=format&fit=crop' }
+    ]
+  },
+  {
+    id: 'svc_004',
+    name: 'Ana Ramos',
+    type: 'home',
+    tag: 'barangay-approved',
+    status: 'approved',
+    category: 'Tutor',
+    barangay: 'San Isidro',
+    address: 'Home service within the barangay',
+    openHours: 'Weekdays 3:00 PM – 7:00 PM',
+    contact: { phone: '0999 122 7744' },
+    thumb: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?q=80&w=1200&auto=format&fit=crop',
+    docs: [
+      { label:'Valid ID', url:'https://images.unsplash.com/photo-1520975940400-32e1c60bdcf0?q=80&w=600&auto=format&fit=crop' }
+    ]
+  }
 ];
 
-let currentFilter="all";
-let searchQuery="";
+/* ------------ STATE ------------ */
+let currentType = 'all';     // 'all' | 'licensed' | 'barangay-approved'
+let currentStatus = 'all';   // 'all' | 'pending' | 'approved' | 'declined'
+let currentQuery = '';
 
-const statusClass = s => ({
-  Pending:"status-badge status-pending",
-  Declined:"status-badge status-declined",
-  Ready:"status-badge status-ready",
-  Completed:"status-badge status-completed"
-}[s]||"status-badge");
+/* ------------ RENDER ------------ */
+const grid = document.getElementById('servicesGrid');
 
-function formatDate(d){return (new Date(d)).toLocaleDateString('en-US',{month:"short",day:"numeric",year:"numeric"});}
+function makeBadge(content, cls) {
+  const span = document.createElement('span');
+  span.className = `badge ${cls}`;
+  span.innerHTML = content;
+  return span;
+}
 
-function renderRequests(filter){
-  currentFilter=filter||currentFilter;
-  const list=document.getElementById("requestsList");
-  list.innerHTML="";
-  let filtered;
+function cardTemplate(item){
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.dataset.id = item.id;
 
-  if(currentFilter==="all"){
-    filtered=REQUESTS.filter(r=>r.status!=="Completed" && r.status!=="Declined");
-  } else if(currentFilter==="completed"){
-    filtered=REQUESTS.filter(r=>r.status==="Completed");
-  } else if(currentFilter==="declined"){
-    filtered=REQUESTS.filter(r=>r.status==="Declined");
+  const img = document.createElement('img');
+  img.className = 'thumb';
+  img.src = item.thumb;
+  img.alt = item.name;
+
+  const body = document.createElement('div');
+  body.className = 'body';
+
+  const title = document.createElement('h3');
+  title.className = 'title';
+  title.textContent = item.name;
+
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  meta.innerHTML = `
+    <span><i class='bx bx-user-pin'></i> ${item.category}</span>
+    <span><i class='bx bx-map'></i> ${item.barangay}</span>
+    ${item.type === 'home' ? "<span><i class='bx bx-home-smile'></i> Home service</span>" : "<span><i class='bx bx-store'></i> Fixed location</span>"}
+  `;
+
+  const badges = document.createElement('div');
+  badges.className = 'badges';
+  // tag badge
+  if(item.tag === 'barangay-approved'){
+    badges.appendChild(makeBadge("🏠 Barangay-Approved", 'b-approved'));
   } else {
-    filtered=REQUESTS.filter(r=>r.type===currentFilter && r.status!=="Completed" && r.status!=="Declined");
+    badges.appendChild(makeBadge("📄 Licensed Business", 'b-licensed'));
   }
+  // status badge
+  const sClass = item.status === 'pending' ? 's-pending' : (item.status === 'approved' ? 's-approved' : 's-declined');
+  const sIcon  = item.status === 'pending' ? '⏳' : (item.status === 'approved' ? '✅' : '❌');
+  badges.appendChild(makeBadge(`${sIcon} ${capitalize(item.status)}`, sClass));
 
-  // Apply search
-  if(searchQuery.trim()){
-    let q=searchQuery.toLowerCase();
-    filtered=filtered.filter(r=>
-      r.fullname.toLowerCase().includes(q) ||
-      r.type.toLowerCase().includes(q) ||
-      r.status.toLowerCase().includes(q) ||
-      r.city.toLowerCase().includes(q) ||
-      r.province.toLowerCase().includes(q) ||
-      r.barangay_name.toLowerCase().includes(q)
-    );
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  actions.innerHTML = `
+    <button class="btn view"><i class='bx bx-show'></i> View</button>
+    <button class="btn approve"><i class='bx bx-badge-check'></i> Approve</button>
+    <button class="btn decline"><i class='bx bx-x-circle'></i> Decline</button>
+    <button class="btn delete"><i class='bx bx-trash'></i> Delete</button>
+  `;
+
+  body.appendChild(title);
+  body.appendChild(meta);
+  body.appendChild(badges);
+
+  card.appendChild(img);
+  card.appendChild(body);
+  card.appendChild(actions);
+
+  return card;
+}
+
+function render(){
+  grid.innerHTML = '';
+  filteredData().forEach(item => {
+    const card = cardTemplate(item);
+    grid.appendChild(card);
+  });
+}
+
+function filteredData(){
+  return services.filter(s => {
+    const matchesType   = currentType === 'all' ? true : (currentType === 'licensed' ? s.tag === 'licensed' : s.tag === 'barangay-approved');
+    const matchesStatus = currentStatus === 'all' ? true : s.status === currentStatus;
+    const text = (s.name + ' ' + s.category + ' ' + s.barangay + ' ' + s.address).toLowerCase();
+    const matchesQuery  = !currentQuery || text.includes(currentQuery);
+    return matchesType && matchesStatus && matchesQuery;
+  });
+}
+
+/* ------------ HELPERS ------------ */
+function ucfirst(str){ return str.charAt(0).toUpperCase() + str.slice(1); }
+function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+function findService(id){ return services.find(s => s.id === id); }
+
+/* ------------ FILTER EVENTS ------------ */
+document.querySelectorAll('.chip-type').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.chip-type').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentType = btn.dataset.type;
+    render();
+  });
+});
+document.querySelectorAll('.chip-status').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.chip-status').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentStatus = btn.dataset.status;
+    render();
+  });
+});
+document.getElementById('searchInput').addEventListener('input', (e)=>{
+  currentQuery = e.target.value.trim().toLowerCase();
+  render();
+});
+
+/* ------------ CARD ACTIONS (DELEGATION) ------------ */
+grid.addEventListener('click', (e)=>{
+  const card = e.target.closest('.card');
+  if(!card) return;
+  const id = card.dataset.id;
+  const svc = findService(id);
+  if(!svc) return;
+
+  if(e.target.closest('.view')){
+    openModalWith(svc);
+  } else if(e.target.closest('.approve')){
+    svc.status = 'approved';
+    render();
+    toast('Approved '+svc.name);
+  } else if(e.target.closest('.decline')){
+    svc.status = 'declined';
+    render();
+    toast('Declined '+svc.name);
+  } else if(e.target.closest('.delete')){
+    const idx = services.findIndex(s=>s.id===id);
+    if(idx>-1){ services.splice(idx,1); render(); toast('Deleted service'); }
   }
+});
 
-  document.getElementById("noRequests").style.display=filtered.length?"none":"block";
+/* ------------ MODAL ------------ */
+function openModalWith(svc){
+  document.getElementById('mThumb').src = svc.thumb;
+  document.getElementById('mTitle').innerHTML = `
+    ${svc.name}
+    ${svc.tag === 'barangay-approved'
+      ? "<span class='badge b-approved'>🏠 Barangay-Approved</span>"
+      : "<span class='badge b-licensed'>📄 Licensed Business</span>"
+    }
+    <span class='badge ${svc.status==='pending'?'s-pending':svc.status==='approved'?'s-approved':'s-declined'}'>
+      ${svc.status==='pending'?'⏳ Pending':svc.status==='approved'?'✅ Approved':'❌ Declined'}
+    </span>
+  `;
+  document.getElementById('mSub').textContent = `${ucfirst(svc.type)} • ${svc.category} • ${svc.barangay}`;
 
-  filtered.forEach(r=>{
-    let card=document.createElement("div");
-    card.className="request-card";
-    card.innerHTML=`
-      <div class="request-header">
-        <span class="resident-name"><i class='bx bx-user'></i> ${r.fullname}</span>
-        <span class="request-type">${r.type}</span>
-      </div>
-      <div class="date-status-row">
-        <span class="submission-date"><i class='bx bx-calendar'></i> ${formatDate(r.date)}</span>
-        <span class="${statusClass(r.status)}">${r.status}</span>
-      </div>
-      <div class="request-actions">
-        ${r.status==="Pending" ? `
-          <button class="print-btn" onclick="printRequestDoc(${r.id})"><i class='bx bx-printer'></i> Print</button>
-          <button class="decline-btn" onclick="openDeclineModal(${r.id})"><i class='bx bx-x'></i> Decline</button>
-          <button class="view-btn" onclick="openViewModal(${r.id})"><i class='bx bx-show'></i> View</button>
-        ` : r.status==="Ready" ? `
-          <button class="complete-btn" onclick="markCompleted(${r.id})"><i class='bx bx-check'></i> Mark Completed</button>
-          <button class="view-btn" onclick="openViewModal(${r.id})"><i class='bx bx-show'></i> View</button>
-        ` : `
-          <button class="view-btn" onclick="openViewModal(${r.id})"><i class='bx bx-show'></i> View</button>
-        `}
-      </div>
-    `;
-    list.appendChild(card);
+  document.getElementById('mDetails').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr;gap:6px;font-size:.95rem;">
+      <div><strong>Address/Area:</strong> ${svc.address}</div>
+      <div><strong>Open Hours:</strong> ${svc.openHours}</div>
+      <div><strong>Contact:</strong> ${svc.contact?.phone || '—'}</div>
+    </div>
+  `;
+
+  const docsEl = document.getElementById('mDocs');
+  docsEl.innerHTML = '';
+  (svc.docs||[]).forEach(d=>{
+    const a = document.createElement('a');
+    a.href = d.url; a.target = '_blank'; a.title = d.label;
+    const img = document.createElement('img');
+    img.className = 'doc'; img.src = d.url; img.alt = d.label;
+    a.appendChild(img);
+    docsEl.appendChild(a);
   });
 
-  updateTabCounts();
+  // Bind Approve/Decline inside modal
+  document.getElementById('mApprove').onclick = ()=>{ svc.status='approved'; render(); closeModal(); toast('Approved '+svc.name); };
+  document.getElementById('mDecline').onclick = ()=>{ svc.status='declined'; render(); closeModal(); toast('Declined '+svc.name); };
+
+  document.getElementById('modalBg').classList.add('active');
+}
+function closeModal(){
+  document.getElementById("modalBg").classList.remove("active");
 }
 
-function updateTabCounts(){
-  document.querySelector('[data-filter="completed"]').textContent = `Completed (${REQUESTS.filter(r=>r.status==="Completed").length})`;
-  document.querySelector('[data-filter="declined"]').textContent = `Declined (${REQUESTS.filter(r=>r.status==="Declined").length})`;
+/* ------------ TOAST (tiny) ------------ */
+function toast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.position='fixed'; t.style.right='16px'; t.style.bottom='16px';
+  t.style.background='#111'; t.style.color='#fff'; t.style.padding='10px 14px';
+  t.style.borderRadius='10px'; t.style.boxShadow='0 6px 18px rgba(0,0,0,.25)';
+  t.style.zIndex='3000'; t.style.fontWeight='700'; t.style.fontSize='.9rem';
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; }, 1400);
+  setTimeout(()=> t.remove(), 1750);
 }
 
-document.querySelectorAll(".filter-tab").forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll(".filter-tab").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    renderRequests(btn.dataset.filter);
-  };
-});
-
-// Live search
-document.getElementById("searchInput").addEventListener("input", e=>{
-  searchQuery=e.target.value;
-  renderRequests();
-});
-
-/* Decline Modal */
-let declineReqId=null;
-function openDeclineModal(id){declineReqId=id;document.getElementById("modalBg").classList.add("active");}
-function closeModal(){document.getElementById("modalBg").classList.remove("active");declineReqId=null;}
-document.getElementById("declineModal").onsubmit=function(e){
-  e.preventDefault();
-  let reason=document.getElementById("declineReason").value.trim();
-  if(!reason){document.getElementById("declineError").textContent="Reason is required.";return;}
-  let req=REQUESTS.find(r=>r.id===declineReqId);
-  if(req){req.status="Declined";req.reason=reason;}
-  closeModal();
-  renderRequests(currentFilter);
-};
-
-/* === Print Button Logic (right-aligned signature block) === */
-function printRequestDoc(id){
-  let req = REQUESTS.find(r=>r.id===id);
-  if(!req) return;
-  if(req.status!=="Declined") req.status = "Ready";
-  renderRequests(currentFilter);
-
-  let docType = ({
-    "Business Permit":"BUSINESS PERMIT",
-    "Indigency":"CERTIFICATE OF INDIGENCY",
-    "Residency":"CERTIFICATE OF RESIDENCY"
-  })[req.type] || req.type;
-
-  let today = new Date();
-  let dateStr = today.toLocaleDateString('en-US',{month:"long",day:"numeric",year:"numeric"});
-
-  let letterBody = {
-    "Business Permit": `
-      <p style="text-indent:2.4em;text-align:justify;">
-        This is to certify that <b>${req.fullname}</b> is a registered resident of <b>${BARANGAY_INFO.name}</b> 
-        and has complied with all barangay requirements for business operations in our locality. 
-        This Business Permit is issued for the purpose of legalizing their business activities, 
-        subject to existing laws and regulations.
-      </p>
-    `,
-    "Indigency": `
-      <p style="text-indent:2.4em;text-align:justify;">
-        This is to certify that <b>${req.fullname}</b>, of legal age and a Filipino citizen, 
-        is an indigent resident of <b>${BARANGAY_INFO.name}</b>, Quezon City. 
-        This certification is issued upon their request for purposes of availing social welfare 
-        assistance, financial aid, or any legal purpose it may serve.
-      </p>
-    `,
-    "Residency": `
-      <p style="text-indent:2.4em;text-align:justify;">
-        This is to certify that <b>${req.fullname}</b> is a bonafide resident of <b>${BARANGAY_INFO.name}</b> 
-        and has lived in the community for not less than six (6) months as of the date of issuance. 
-        This certificate is issued for whatever legal intent and purpose it may serve the bearer.
-      </p>
-    `
-  }[req.type] || `
-    <p style="text-indent:2.4em;text-align:justify;">
-      This is to certify that <b>${req.fullname}</b> has made a request for ${req.type} in this barangay.
-    </p>
-  `;
-
-  let logo = BARANGAY_INFO.logo ? 
-    `<img src="${BARANGAY_INFO.logo}" alt="Barangay Logo" style="height:82px;max-width:100px;display:block;">` : '';
-  let bagongLogo = BARANGAY_INFO.bagongPilipinasLogo ? 
-    `<img src="${BARANGAY_INFO.bagongPilipinasLogo}" alt="Bagong Pilipinas Logo" style="height:82px;max-width:110px;display:block;">` : '';
-
-  let html = `
-    <html>
-    <head>
-      <title>${docType} - ${req.fullname}</title>
-      <style>
-        @media print {
-          body { margin:0; }
-          .doc-a4 { width:210mm; min-height:297mm; padding:0; margin:0; box-sizing:border-box; background:#fff; }
-          .doc-inner { width:100%; max-width:670px; margin:0 auto; padding:54px 46px 44px 46px; }
-        }
-        body { background:#fff; margin:0; }
-        .doc-a4 {
-          width:210mm; min-height:297mm; margin:auto; background:#fff; padding:0; 
-          box-sizing:border-box; display:flex;flex-direction:column;justify-content:center;
-        }
-        .doc-inner {
-          width:100%; max-width:670px; margin:0 auto; padding:54px 46px 44px 46px; 
-          background:#fff; border-radius:12px;
-        }
-        .doc-logos {
-          width:100%; display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;
-        }
-        .doc-logo-left, .doc-logo-right { width:115px;height:82px;display:flex;align-items:center;justify-content:center;}
-        .doc-header-main {text-align:center;margin-top:0;margin-bottom:10px;line-height:1.2;}
-        .office-label { font-size:1.01em; font-weight:600; letter-spacing:1.7px; }
-        .doc-title {font-size:1.25em;font-weight:800;margin-bottom:1.7px;text-transform:uppercase;letter-spacing:1.2px;}
-        .doc-type {font-size:1.18em;font-weight:700;text-decoration:underline;margin-bottom:18px;letter-spacing:1.3px;}
-        .doc-body {font-size:1.11em;line-height:1.65;color:#232;text-align:justify;margin-bottom:38px;}
-        .doc-issue-date {font-size:1.05em;color:#222;margin-top:14px;margin-bottom:0px;}
-        .doc-footer { margin-top:66px; text-align: right; width: 100%; }
-        .captain {
-          font-weight:700; font-size:1.15em; margin-top:40px; border-top:1.6px solid #333;
-          width:265px; margin-left:auto; margin-right:0; padding-top:7px; letter-spacing:.5px;
-          text-align:center; display:block;
-        }
-        .captain-label { font-size:1em; font-weight:400; color:#444; margin-top:2px; display:block; text-align:center; }
-        @page { size: A4; margin: 0; }
-      </style>
-    </head>
-    <body>
-      <div class="doc-a4">
-        <div class="doc-inner">
-          <div class="doc-logos">
-            <div class="doc-logo-left">${logo}</div>
-            <div class="doc-logo-right">${bagongLogo}</div>
-          </div>
-          <div class="doc-header-main">
-            <div class="office-label">Republic of the Philippines<br>City of Quezon<br><b>${BARANGAY_INFO.name.toUpperCase()}</b></div>
-            <div class="doc-title">OFFICE OF THE BARANGAY CAPTAIN</div>
-            <div class="doc-type">${docType}</div>
-          </div>
-          <div class="doc-body">
-            <div>TO WHOM IT MAY CONCERN:</div>
-            ${letterBody}
-          </div>
-          <div class="doc-issue-date">Issued this <b>${dateStr}</b> at the Office of the Barangay Captain, ${BARANGAY_INFO.name}, ${BARANGAY_INFO.address}</div>
-          <div class="doc-footer">
-            <div class="captain">
-              ${BARANGAY_INFO.captain}
-              <div class="captain-label">Punong Barangay</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-  let w = window.open("", "PrintDoc", "width=900,height=1400");
-  w.document.write(html);
-  w.document.close();
-  w.focus();
-  setTimeout(()=>w.print(), 200);
-}
-
-/* Mark Completed */
-function markCompleted(id){
-  let req=REQUESTS.find(r=>r.id===id);
-  if(!req) return;
-  req.status="Completed";
-  renderRequests(currentFilter);
-}
-
-/* View Modal */
-function openViewModal(id){
-  let req=REQUESTS.find(r=>r.id===id);if(!req)return;
-  document.getElementById("viewModalBg").classList.add("active");
-  const c=document.getElementById("viewContent");
-  c.innerHTML=`
-    <div class="view-row"><span class="view-label">Full Name:</span><span class="view-value">${req.fullname}</span></div>
-    <div class="view-row"><span class="view-label">Civil Status:</span><span class="view-value">${req.civil_status}</span></div>
-    <div class="view-row"><span class="view-label">Date of Birth:</span><span class="view-value">${new Date(req.date_of_birth).toLocaleDateString()}</span></div>
-    <div class="view-row"><span class="view-label">House/Street:</span><span class="view-value">${req.house_street}</span></div>
-    <div class="view-row"><span class="view-label">City:</span><span class="view-value">${req.city}</span></div>
-    <div class="view-row"><span class="view-label">Province:</span><span class="view-value">${req.province}</span></div>
-    <div class="view-row"><span class="view-label">Date of Residency:</span><span class="view-value">${new Date(req.date_of_residency).toLocaleDateString()}</span></div>
-    <div class="view-row"><span class="view-label">Years of Residency:</span><span class="view-value">${req.years_residency}</span></div>
-    <div class="view-row"><span class="view-label">Purpose:</span><span class="view-value">${req.purpose}</span></div>
-    ${req.valid_id_url?`<div class="view-row"><span class="view-label">Valid ID:</span><span class="view-value"><img src="${req.valid_id_url}"></span></div>`:""}
-    <div class="view-row"><span class="view-label">Email:</span><span class="view-value">${req.email}</span></div>
-    <div class="view-row"><span class="view-label">Phone:</span><span class="view-value">${req.phone}</span></div>
-    <div class="view-row"><span class="view-label">Barangay:</span><span class="view-value">${req.barangay_name}</span></div>
-    <hr>
-    <div class="view-row"><span class="view-label">Request Type:</span><span class="view-value">${req.type}</span></div>
-    <div class="view-row"><span class="view-label">Status:</span><span class="view-value">${req.status}</span></div>
-    <div class="view-row"><span class="view-label">Submitted on:</span><span class="view-value">${new Date(req.date).toLocaleDateString()}</span></div>
-    ${req.reason?`<div class="view-row"><span class="view-label">Reason (if Declined):</span><span class="view-value">${req.reason}</span></div>`:""}
-  `;
-}
-function closeViewModal(){document.getElementById("viewModalBg").classList.remove("active");}
-
-renderRequests("all");
+/* ------------ INIT ------------ */
+render();
 </script>
 </body>
 </html>
