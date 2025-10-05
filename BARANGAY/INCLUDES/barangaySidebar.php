@@ -93,7 +93,7 @@
       <li><a href="barangayAnnouncements.php" class="active"><i class='bx bx-list-plus'></i><span> Announcements</span></a></li>
       <li><a href="verification.php"><i class='bx bx-id-card'></i><span> Verification Status</span></a></li>
       <li><a href="requests.php"><i class='bx bx-file'></i><span> Requests</span></a></li>
-      <li><a href="settings.php"><i class='bx bx-cog'></i><span> Settings</span></a></li>
+      <li><a href="store.php"><i class='bx bx-cog'></i><span> store</span></a></li>
       <li><a href="barangayLanding.php"><i class='bx bx-log-out'></i><span> Logout</span></a></li>
     </ul>
   </nav>
