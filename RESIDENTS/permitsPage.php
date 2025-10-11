@@ -148,24 +148,99 @@
     <p>Apply online for clearances, residency certificates, and permits. Track status without visiting the hall.</p>
   </section>
 
-  <!-- Apply cards -->
-  <div class="grid cols-3" id="permitGrid">
-    <div class="card">
-      <h3>Barangay Clearance</h3>
-      <p>Certification of good standing.<br><strong>Requirements:</strong> Valid ID, Cedula</p>
-      <button class="btn" data-permit="Barangay Clearance">Apply Now</button>
-    </div>
-    <div class="card">
-      <h3>Residency Certificate</h3>
-      <p>Proof of residence.<br><strong>Requirements:</strong> Barangay ID or Proof of Address</p>
-      <button class="btn" disabled>Coming Soon</button>
-    </div>
-    <div class="card">
-      <h3>Permit to Operate</h3>
-      <p>Business operation permit.<br><strong>Requirements:</strong> DTI/SEC Registration, Lease/Ownership Papers</p>
-      <button class="btn" disabled>Coming Soon</button>
-    </div>
+<!-- Apply cards -->
+<div class="grid cols-3" id="permitGrid">
+  <!-- Barangay Clearance -->
+  <div class="card">
+    <h3>Barangay Clearance</h3>
+    <p>Certification of good moral standing.<br>
+      <strong>Requirements:</strong> Valid ID, Cedula
+    </p>
+    <button class="btn" data-permit="Barangay Clearance">Apply Now</button>
   </div>
+
+  <!-- Residency Certificate -->
+  <div class="card">
+    <h3>Residency Certificate</h3>
+    <p>Proof of current residence.<br>
+      <strong>Requirements:</strong> Barangay ID or Proof of Address
+    </p>
+    <button class="btn" data-permit="Residency">Apply Now</button>
+  </div>
+
+  <!-- Certificate of Indigency -->
+  <div class="card">
+    <h3>Certificate of Indigency</h3>
+    <p>Issued to financially challenged residents.<br>
+      <strong>Requirements:</strong> Valid ID, Proof of Income (if applicable)
+    </p>
+    <button class="btn" data-permit="Indigency">Apply Now</button>
+  </div>
+
+  <!-- Good Moral Certificate -->
+  <div class="card">
+    <h3>Certificate of Good Moral Character</h3>
+    <p>Certification of good conduct and behavior.<br>
+      <strong>Requirements:</strong> Valid ID, Barangay Clearance
+    </p>
+    <button class="btn" data-permit="Good Moral">Apply Now</button>
+  </div>
+
+  <!-- Solo Parent Certificate -->
+  <div class="card">
+    <h3>Certificate of Solo Parent</h3>
+    <p>Recognition for single parents under R.A. 8972.<br>
+      <strong>Requirements:</strong> Valid ID, Proof of Solo Parent Status
+    </p>
+    <button class="btn" data-permit="Solo Parent">Apply Now</button>
+  </div>
+
+  <!-- Late Birth Registration -->
+  <div class="card">
+    <h3>Certification for Late Birth Registration</h3>
+    <p>Support for delayed PSA birth registration.<br>
+      <strong>Requirements:</strong> Valid ID, Birth Record (if available)
+    </p>
+    <button class="btn" data-permit="Late Birth Registration">Apply Now</button>
+  </div>
+
+  <!-- Certificate of No Record -->
+  <div class="card">
+    <h3>Certificate of No Record</h3>
+    <p>Proof that no blotter or complaint record exists.<br>
+      <strong>Requirements:</strong> Valid ID
+    </p>
+    <button class="btn" data-permit="No Record">Apply Now</button>
+  </div>
+
+  <!-- Certificate of Employment -->
+  <div class="card">
+    <h3>Certificate of Employment / Residency</h3>
+    <p>Proof of employment or self-employment within barangay.<br>
+      <strong>Requirements:</strong> Valid ID, Employment Proof or Business Permit
+    </p>
+    <button class="btn" data-permit="Employment">Apply Now</button>
+  </div>
+
+  <!-- OJT Endorsement -->
+  <div class="card">
+    <h3>Certificate of OJT / Training Endorsement</h3>
+    <p>Endorsement for students applying for internships.<br>
+      <strong>Requirements:</strong> Valid ID, School Endorsement Letter
+    </p>
+    <button class="btn" data-permit="OJT">Apply Now</button>
+  </div>
+
+  <!-- Business Permit -->
+  <div class="card">
+    <h3>Business Permit</h3>
+    <p>Authorization for business operations.<br>
+      <strong>Requirements:</strong> DTI/SEC Registration, Lease/Ownership Papers
+    </p>
+    <button class="btn" data-permit="Business Permit">Apply Now</button>
+  </div>
+</div>
+
 
   <!-- My Requests -->
   <section style="margin-top:40px;">

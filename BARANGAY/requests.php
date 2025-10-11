@@ -42,12 +42,14 @@
     }
 
     /* Tabs */
-    .filter-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+    .filter-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;  overflow-x: auto;
+  scrollbar-width: thin;
+}
     .filter-tab{
       all:unset;cursor:pointer;padding:8px 18px;border-radius:999px;
       font-weight:600;font-size:.95rem;
       border:1px solid var(--border);background:#f3f4f6;color:var(--brand);
-      transition:.2s;
+      transition:.2s; white-space: nowrap;
     }
     .filter-tab.active{
       background:linear-gradient(135deg,var(--brand),var(--accent));
@@ -131,14 +133,24 @@
         </div>
       </div>
 
-      <nav class="filter-tabs">
-        <button class="filter-tab active" data-filter="all">All</button>
-        <button class="filter-tab" data-filter="completed">Completed (0)</button>
-        <button class="filter-tab" data-filter="declined">Declined (0)</button>
-        <button class="filter-tab" data-filter="Indigency">Indigency</button>
-        <button class="filter-tab" data-filter="Residency">Residency</button>
-        <button class="filter-tab" data-filter="Business Permit">Business Permit</button>
-      </nav>
+    <nav class="filter-tabs">
+  <button class="filter-tab active" data-filter="all">All</button>
+  <button class="filter-tab" data-filter="completed">Completed (0)</button>
+  <button class="filter-tab" data-filter="declined">Declined (0)</button>
+
+  <!-- Specific document filters -->
+  <button class="filter-tab" data-filter="Barangay Clearance">Barangay Clearance</button>
+  <button class="filter-tab" data-filter="Indigency">Indigency</button>
+  <button class="filter-tab" data-filter="Residency">Residency</button>
+  <button class="filter-tab" data-filter="Good Moral">Good Moral</button>
+  <button class="filter-tab" data-filter="Solo Parent">Solo Parent</button>
+  <button class="filter-tab" data-filter="Late Birth Registration">Late Birth Registration</button>
+  <button class="filter-tab" data-filter="No Record">No Record</button>
+  <button class="filter-tab" data-filter="Employment">Employment</button>
+  <button class="filter-tab" data-filter="OJT">OJT</button>
+  <button class="filter-tab" data-filter="Business Permit">Business Permit</button>
+</nav>
+
 
       <section id="requestsList" class="requests-list"></section>
       <div id="noRequests" class="no-requests" style="display:none;">
@@ -303,43 +315,101 @@ function printRequestDoc(id){
   renderRequests(currentFilter);
 
   let docType = ({
-    "Business Permit":"BUSINESS PERMIT",
-    "Indigency":"CERTIFICATE OF INDIGENCY",
-    "Residency":"CERTIFICATE OF RESIDENCY"
-  })[req.type] || req.type;
+  "Business Permit": "BUSINESS PERMIT",
+  "Indigency": "CERTIFICATE OF INDIGENCY",
+  "Residency": "CERTIFICATE OF RESIDENCY",
+  "Barangay Clearance": "BARANGAY CLEARANCE",
+  "Good Moral": "CERTIFICATE OF GOOD MORAL CHARACTER",
+  "Solo Parent": "CERTIFICATE OF SOLO PARENT",
+  "Late Birth Registration": "CERTIFICATION FOR LATE REGISTRATION OF BIRTH",
+  "No Record": "CERTIFICATION OF NO RECORD",
+  "Employment": "CERTIFICATE OF EMPLOYMENT / RESIDENCY",
+  "OJT": "CERTIFICATE OF OJT / TRAINING ENDORSEMENT"
+})[req.type] || req.type;
 
-  let today = new Date();
-  let dateStr = today.toLocaleDateString('en-US',{month:"long",day:"numeric",year:"numeric"});
+let today = new Date();
+let dateStr = today.toLocaleDateString('en-US', { month: "long", day: "numeric", year: "numeric" });
 
-  let letterBody = {
-    "Business Permit": `
-      <p style="text-indent:2.4em;text-align:justify;">
-        This is to certify that <b>${req.fullname}</b> is a registered resident of <b>${BARANGAY_INFO.name}</b> 
-        and has complied with all barangay requirements for business operations in our locality. 
-        This Business Permit is issued for the purpose of legalizing their business activities, 
-        subject to existing laws and regulations.
-      </p>
-    `,
-    "Indigency": `
-      <p style="text-indent:2.4em;text-align:justify;">
-        This is to certify that <b>${req.fullname}</b>, of legal age and a Filipino citizen, 
-        is an indigent resident of <b>${BARANGAY_INFO.name}</b>, Quezon City. 
-        This certification is issued upon their request for purposes of availing social welfare 
-        assistance, financial aid, or any legal purpose it may serve.
-      </p>
-    `,
-    "Residency": `
-      <p style="text-indent:2.4em;text-align:justify;">
-        This is to certify that <b>${req.fullname}</b> is a bonafide resident of <b>${BARANGAY_INFO.name}</b> 
-        and has lived in the community for not less than six (6) months as of the date of issuance. 
-        This certificate is issued for whatever legal intent and purpose it may serve the bearer.
-      </p>
-    `
-  }[req.type] || `
+let letterBody = {
+  "Business Permit": `
     <p style="text-indent:2.4em;text-align:justify;">
-      This is to certify that <b>${req.fullname}</b> has made a request for ${req.type} in this barangay.
+      This is to certify that <b>${req.fullname}</b> is a registered resident of <b>${BARANGAY_INFO.name}</b>
+      and has complied with all barangay requirements for business operations within the locality.
+      This permit is issued to legalize and recognize their business, subject to existing rules and regulations.
     </p>
-  `;
+  `,
+  "Indigency": `
+    <p style="text-indent:2.4em;text-align:justify;">
+      This is to certify that <b>${req.fullname}</b>, of legal age and a Filipino citizen,
+      is an indigent resident of <b>${BARANGAY_INFO.name}</b>, Quezon City.
+      This certification is issued to support their application for financial, medical, or legal assistance.
+    </p>
+  `,
+  "Residency": `
+    <p style="text-indent:2.4em;text-align:justify;">
+      This is to certify that <b>${req.fullname}</b> is a bonafide resident of <b>${BARANGAY_INFO.name}</b>
+      and has continuously lived in the community for not less than six (6) months.
+      This certificate is issued for whatever legal purpose it may serve the bearer.
+    </p>
+  `,
+  "Barangay Clearance": `
+    <p style="text-indent:2.4em;text-align:justify;">
+      This is to certify that <b>${req.fullname}</b> is a resident of <b>${BARANGAY_INFO.name}</b>
+      and is known to be of good moral character with no derogatory record within this barangay.
+      This clearance is issued upon request for employment, business, or any legal purpose.
+    </p>
+  `,
+  "Good Moral": `
+    <p style="text-indent:2.4em;text-align:justify;">
+      This is to certify that <b>${req.fullname}</b> has been a law-abiding and morally upright resident of
+      <b>${BARANGAY_INFO.name}</b>. During their stay in this community, they have not been involved in any
+      unlawful or immoral act as per barangay records.
+      This certification is issued for school, employment, or any legal purpose it may serve.
+    </p>
+  `,
+  "Solo Parent": `
+    <p style="text-indent:2.4em;text-align:justify;">
+      This is to certify that <b>${req.fullname}</b> is a resident of <b>${BARANGAY_INFO.name}</b>
+      and has been verified as a <b>solo parent</b> under the Republic Act No. 8972 or the Solo Parents’ Welfare Act.
+      This certification is issued for DSWD, employment, or assistance purposes.
+    </p>
+  `,
+  "Late Birth Registration": `
+    <p style="text-indent:2.4em;text-align:justify;">
+      This is to certify that <b>${req.fullname}</b> is a resident of <b>${BARANGAY_INFO.name}</b>
+      and is known personally to the Barangay Officials.
+      This certification is issued to support the late registration of their birth certificate.
+    </p>
+  `,
+  "No Record": `
+    <p style="text-indent:2.4em;text-align:justify;">
+      This is to certify that after diligent verification of records in the barangay,
+      there is <b>no record found</b> under the name of <b>${req.fullname}</b> pertaining to any blotter,
+      complaint, or administrative case.
+      This certification is issued upon request for legal and administrative purposes.
+    </p>
+  `,
+  "Employment": `
+    <p style="text-indent:2.4em;text-align:justify;">
+      This is to certify that <b>${req.fullname}</b> is a resident of <b>${BARANGAY_INFO.name}</b>
+      and is currently employed/self-employed within the barangay jurisdiction.
+      This certification is issued upon their request for employment verification or documentation purposes.
+    </p>
+  `,
+  "OJT": `
+    <p style="text-indent:2.4em;text-align:justify;">
+      This is to certify that <b>${req.fullname}</b> is a resident of <b>${BARANGAY_INFO.name}</b>
+      and is being endorsed by the barangay to undergo On-the-Job Training or Internship,
+      having no derogatory records in this locality.
+      This certification is issued for educational purposes only.
+    </p>
+  `
+}[req.type] || `
+  <p style="text-indent:2.4em;text-align:justify;">
+    This is to certify that <b>${req.fullname}</b> has made a request for ${req.type} in this barangay.
+  </p>
+`;
+
 
   let logo = BARANGAY_INFO.logo ? 
     `<img src="${BARANGAY_INFO.logo}" alt="Barangay Logo" style="height:82px;max-width:100px;display:block;">` : '';
