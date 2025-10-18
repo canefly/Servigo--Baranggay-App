@@ -162,7 +162,6 @@ footer{
 <nav class="navtabs">
   <a href="residentsPage.php" class="tabbtn active">News</a>
   <a href="permitsPage.php" class="tabbtn">Permits</a>
-  <a href="suggestion.php" class="tabbtn">Feedback</a>
   <a href="storesPage.php" class="tabbtn">Stores</a>
 </nav>
 

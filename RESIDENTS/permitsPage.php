@@ -139,7 +139,6 @@
 <nav class="navtabs">
   <a href="residentsPage.php" class="tabbtn">News</a>
   <a href="permitsPage.php" class="tabbtn active">Permits</a>
-  <a href="suggestion.php" class="tabbtn">Feedback</a>
   <a href="storesPage.php" class="tabbtn">Stores</a>
 </nav>
 

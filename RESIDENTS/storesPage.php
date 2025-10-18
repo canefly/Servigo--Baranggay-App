@@ -112,7 +112,6 @@ footer{color:var(--muted);text-align:center;padding:20px 12px;font-size:14px}
 <nav class="navtabs">
   <a href="residentsPage.php" class="tabbtn">News</a>
   <a href="permitsPage.php" class="tabbtn">Permits</a>
-  <a href="suggestion.php" class="tabbtn">Feedback</a>
   <a href="storesPage.php" class="tabbtn active">Stores</a>
 </nav>
 

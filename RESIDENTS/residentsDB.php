@@ -121,7 +121,6 @@ body.no-scroll { overflow:hidden; }
       <li><a href="residentsPage.php" class="active"><i class="fas fa-file-alt"></i><span>Requests</span></a></li>
       <li><a href="index.php?page=announcements"><i class="fas fa-bullhorn"></i><span>Announcements</span></a></li>
       <li><a href="index.php?page=files"><i class="fas fa-folder-open"></i><span>File Library</span></a></li>
-      <li><a href="index.php?page=feedback"><i class="fas fa-comment-dots"></i><span>Feedback</span></a></li>
       <li><a href="index.php?page=analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a></li>
       <li><a href="index.php?page=audit"><i class="fas fa-history"></i><span>Audit Logs</span></a></li>
       <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
