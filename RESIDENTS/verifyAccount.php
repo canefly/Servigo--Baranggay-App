@@ -196,6 +196,85 @@
       preview.style.display = 'block';
     }
   }
+
+
+const SUPABASE_URL="https://hlyjmgwpufqtghwnpgfe.supabase.co/";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWptZ3dwdWZxdGdod25wZ2ZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NzYxMjEsImV4cCI6MjA3MzM1MjEyMX0.G0ocq2K1DAHqM5zn3ZfyflUd5gH2QS27_TY548ZgEOw";
+const RESIDENT_ID = localStorage.getItem("sg_id");
+const BARANGAY = localStorage.getItem("sg_brgy");
+const residentName = localStorage.getItem("sg_name");
+
+document.querySelector("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const validID = document.getElementById("validID").value;
+  const file = document.getElementById("uploadID").files[0];
+  if (!file) return alert("Please upload your valid ID.");
+
+  // Upload file
+  const fileName = `${Date.now()}_${file.name}`;
+  const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/verification/${fileName}`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      "x-upsert": "true",
+      "Content-Type": file.type
+    },
+    body: file
+  });
+  if (!uploadRes.ok) return alert("Failed to upload ID.");
+  const uploadedUrl = `${SUPABASE_URL}/storage/v1/object/public/verification/${fileName}`;
+
+  // Insert verification record
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/resident_verifications`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      resident_id: RESIDENT_ID,
+      id_type: validID,
+      valid_id_url: uploadedUrl,
+      status: "Pending"
+    })
+  });
+
+  if (!res.ok) {
+    alert("Verification submission failed.");
+    return;
+  }
+
+  alert("✅ Verification submitted successfully! Barangay Admin will review your ID.");
+
+  // 🔔 Send Notification to Admin
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        barangay_name: BARANGAY,
+        recipient_type: "admin",
+        type: "verification",
+        title: "New Resident Verification",
+        message: `${residentName} submitted an ID for verification.`,
+        source_table: "resident_verifications",
+        source_id: RESIDENT_ID
+      })
+    });
+    console.log("✅ Notification sent to admin.");
+  } catch (err) {
+    console.error("⚠️ Failed to send notification:", err);
+  }
+});
+
+</script>
+
 </script>
 </body>
 </html>

@@ -163,6 +163,7 @@ footer{
   <a href="residentsPage.php" class="tabbtn active">News</a>
   <a href="permitsPage.php" class="tabbtn">Permits</a>
   <a href="storesPage.php" class="tabbtn">Stores</a>
+  <a href="events.php" class="tabbtn">Events</a>
 </nav>
 
 <main class="container" id="app" tabindex="-1">

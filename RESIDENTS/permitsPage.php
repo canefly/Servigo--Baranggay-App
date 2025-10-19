@@ -140,6 +140,8 @@
   <a href="residentsPage.php" class="tabbtn">News</a>
   <a href="permitsPage.php" class="tabbtn active">Permits</a>
   <a href="storesPage.php" class="tabbtn">Stores</a>
+  <a href="events.php" class="tabbtn">Events</a>
+
 </nav>
 
 <main class="container">
@@ -365,6 +367,31 @@ document.getElementById('applyForm').addEventListener('submit',async e=>{
     document.getElementById('applyResult').innerHTML="<span style='color:#dc2626'>❌ "+(out.message||JSON.stringify(out))+"</span>";
   }
 });
+
+// 🔔 Send Notification to Barangay Admin
+try {
+  await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      barangay_name: BARANGAY,
+      recipient_type: "admin",
+      type: "request",
+      title: "New Permit Request",
+      message: `${data.fullname} submitted a ${data.permit_type} request.`,
+      source_table: "barangay_clearance_requests",
+      source_id: out[0]?.id || null
+    })
+  });
+  console.log("✅ Notification sent to admin");
+} catch (err) {
+  console.error("⚠️ Failed to send notification:", err);
+}
+
 
 // Fetch requests
 async function loadMyRequests(){
