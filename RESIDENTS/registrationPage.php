@@ -128,7 +128,7 @@ footer{color:var(--muted);text-align:center;padding:20px 12px;font-size:14px}
 
 <!-- ✅ Navtabs -->
 <nav class="navtabs">
-  <a href="residentsPage.php" class="tabbtn">News</a>
+  <a href="residentsPage.php" class="tabbtn active">News</a>
   <a href="permitsPage.php" class="tabbtn">Permits</a>
   <a href="storesPage.php" class="tabbtn">Stores</a>
 </nav>
