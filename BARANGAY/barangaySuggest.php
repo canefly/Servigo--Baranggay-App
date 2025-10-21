@@ -162,22 +162,7 @@
 
     <!-- Create -->
     <section class="card">
-      <h2>Create Announcement</h2>
-      <form id="announceForm" enctype="multipart/form-data">
-        <label>Title</label>
-        <input type="text" name="title" required>
-        <label>Description</label>
-        <textarea name="description" required></textarea>
-        <label>Category</label>
-        <select name="category" required>
-          <option>Advisory</option>
-          <option>Event</option>
-          <option>Emergency</option>
-        </select>
-        <label>Image (optional)</label>
-        <input type="file" id="image" accept="image/*">
-        <button type="submit" class="btn">Post Announcement</button>
-        <p id="msg"></p>
+
       </form>
     </section>
 
@@ -190,117 +175,6 @@
   </main>
 </div>
 
-<script>
-const SUPABASE_URL = "https://hlyjmgwpufqtghwnpgfe.supabase.co/";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWptZ3dwdWZxdGdod25wZ2ZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NzYxMjEsImV4cCI6MjA3MzM1MjEyMX0.G0ocq2K1DAHqM5zn3ZfyflUd5gH2QS27_TY548ZgEOw";
-const BARANGAY=localStorage.getItem("bg_name")||"San Isidro";
 
-/* ✅ Fixed Upload Image */
-async function uploadImage(file){
-  const fileName=Date.now()+"-"+file.name;
-  const formData=new FormData();
-  formData.append("file",file);
-
-  const res=await fetch(`${SUPABASE_URL}/storage/v1/object/announcements/${fileName}`,{
-    method:"POST",
-    headers:{
-      apikey:SUPABASE_KEY,
-      Authorization:"Bearer "+SUPABASE_KEY,
-      "x-upsert":"true"
-    },
-    body:formData
-  });
-  if(!res.ok) throw new Error("Upload failed: "+(await res.text()));
-  return `${SUPABASE_URL}/storage/v1/object/public/announcements/${fileName}`;
-}
-
-/* Submit Form */
-document.getElementById("announceForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const msg=document.getElementById("msg");
-  msg.textContent=""; msg.className="";
-
-  const title=e.target.title.value.trim();
-  const description=e.target.description.value.trim();
-  const category=e.target.category.value;
-  let image_url=null;
-
-  const file=document.getElementById("image").files[0];
-  if(file){ try{ image_url=await uploadImage(file);}catch(err){msg.className="error";msg.textContent=err.message;return;} }
-
-  const data={title,description,category,barangay_name:BARANGAY,image_url};
-  const res=await fetch(`${SUPABASE_URL}/rest/v1/announcements`,{
-    method:"POST",
-    headers:{
-      apikey:SUPABASE_KEY,
-      Authorization:"Bearer "+SUPABASE_KEY,
-      "Content-Type":"application/json",
-      Prefer:"return=representation"
-    },
-    body:JSON.stringify(data)
-  });
-  const result=await res.json();
-
-  if(res.ok){
-    msg.className="ok";msg.textContent="✅ Posted!";
-    e.target.reset();
-    loadPosts();
-  } else {
-    msg.className="error";msg.textContent="❌ "+(result.message||JSON.stringify(result));
-  }
-});
-
-/* Load Posts */
-async function loadPosts(){
-  const postsEl=document.getElementById("posts");
-  postsEl.innerHTML="";
-  const res=await fetch(`${SUPABASE_URL}/rest/v1/announcements?barangay_name=eq.${BARANGAY}&order=created_at.desc`,{
-    headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}
-  });
-  const data=await res.json();
-  if(!data.length){postsEl.innerHTML="<p>No announcements yet.</p>";return;}
-
-  data.forEach(p=>{
-    const div=document.createElement("div");
-    div.className="post";
-    div.innerHTML=`
-      <div class="meta"><strong>${p.category}</strong> • ${new Date(p.created_at).toLocaleDateString()}</div>
-      <h3>${p.title}</h3>
-      <p class="desc">${p.description}</p>
-      ${p.image_url?`<div class="image-wrapper"><img src="${p.image_url}" alt="Announcement image"></div>`:""}
-      <button class="delete" onclick="deletePost(${p.id})">🗑 Delete</button>
-    `;
-
-    // See More/See Less
-    const descEl=div.querySelector(".desc");
-    requestAnimationFrame(()=>{
-      if(descEl.scrollHeight>descEl.clientHeight){
-        const toggle=document.createElement("button");
-        toggle.className="see-toggle";
-        toggle.textContent="See More";
-        toggle.onclick=()=>{
-          div.classList.toggle("expanded");
-          toggle.textContent=div.classList.contains("expanded")?"See Less":"See More";
-        };
-        div.insertBefore(toggle,div.querySelector(".image-wrapper"));
-      }
-    });
-
-    postsEl.appendChild(div);
-  });
-}
-
-/* Delete Post */
-async function deletePost(id){
-  if(!confirm("Delete this post?")) return;
-  await fetch(`${SUPABASE_URL}/rest/v1/announcements?id=eq.${id}`,{
-    method:"DELETE",
-    headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}
-  });
-  loadPosts();
-}
-
-loadPosts();
-</script>
 </body>
 </html>

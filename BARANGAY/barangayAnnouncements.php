@@ -1,8 +1,65 @@
-<?php 
+<?php
+// =======================================================
+// Barangay Announcements (Native SQL version)
+// =======================================================
 require_once(__DIR__ . "/../Database/session-checker.php");
 requireRole("admin");
+require_once(__DIR__ . "/../Database/connection.php");
 include 'Components/barangaySidebar.php';
-include 'Components/barangayTopbar.php'; ?>
+include 'Components/barangayTopbar.php';
+
+// Handle Deletion before HTML render to prevent output errors
+if (isset($_POST["delete"]) && !empty($_POST["delete_id"])) {
+    $del_id = intval($_POST["delete_id"]);
+    $del = $conn->prepare("DELETE FROM announcements WHERE id = ?");
+    $del->bind_param("i", $del_id);
+    $del->execute();
+    header("Location: announcements.php");
+    exit();
+}
+
+// Handle Create
+$msg = "";
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["title"]) && !isset($_POST["delete"])) {
+    $title = trim($_POST["title"]);
+    $description = trim($_POST["description"]);
+    $category = $_POST["category"];
+    $barangay_name = $_SESSION["barangay_name"] ?? "San Isidro";
+    $image_url = null;
+    $image_path = null;
+
+    // ✅ Handle image upload (if any)
+    if (!empty($_FILES["image"]["name"])) {
+        $upload_dir = __DIR__ . "/../uploads/announcements/";
+        if (!file_exists($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        $file_name = time() . "_" . basename($_FILES["image"]["name"]);
+        $target_path = $upload_dir . $file_name;
+
+        if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_path)) {
+            $image_url = "/uploads/announcements/" . $file_name;
+            $image_path = $target_path;
+        } else {
+            $msg = "<p class='error'>❌ Failed to upload image.</p>";
+        }
+    }
+
+    // ✅ Insert into database
+    if (!$msg) {
+        $stmt = $conn->prepare("
+            INSERT INTO announcements (barangay_name, title, description, category, image_url, image_path, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, NOW())
+        ");
+        $stmt->bind_param("ssssss", $barangay_name, $title, $description, $category, $image_url, $image_path);
+        if ($stmt->execute()) {
+            $msg = "<p class='ok'>✅ Announcement posted successfully!</p>";
+        } else {
+            $msg = "<p class='error'>❌ Database Error: " . $conn->error . "</p>";
+        }
+    }
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -25,14 +82,13 @@ include 'Components/barangayTopbar.php'; ?>
       --radius:14px;
       --gap:16px;
     }
-
-    *{box-sizing:border-box;margin:0;padding:0}
-  body {
-  margin: 0;              /* prevent browser default margin */
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, sans-serif;
-}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,sans-serif;
+    }
     .layout{display:flex;min-height:100vh;}
     .main-content{
       flex:1;
@@ -41,15 +97,12 @@ include 'Components/barangayTopbar.php'; ?>
       max-width:100%;
     }
     @media(min-width:1024px){.main-content{margin-left:275px;}}
-
-    /* Card */
     .card{
       background:var(--card);
       padding:var(--gap);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       margin-bottom:var(--gap);
-      width:100%;
     }
     h2{margin-bottom:12px;font-size:1.25rem;color:var(--brand);}
     label{font-weight:600;display:block;margin-top:12px;}
@@ -62,8 +115,6 @@ include 'Components/barangayTopbar.php'; ?>
       border-radius:10px;
     }
     textarea{resize:vertical;min-height:100px;}
-
-    /* Buttons */
     .btn{
       width:100%;
       margin-top:16px;
@@ -78,8 +129,6 @@ include 'Components/barangayTopbar.php'; ?>
       transition:.2s;
     }
     .btn:hover{opacity:.9;}
-
-    /* Feedback */
     .error,.ok{
       margin-top:10px;
       padding:10px;
@@ -88,8 +137,6 @@ include 'Components/barangayTopbar.php'; ?>
     }
     .error{background:#fee2e2;color:var(--error);border:1px solid #ef4444;}
     .ok{background:#dcfce7;color:var(--ok);border:1px solid #22c55e;}
-
-    /* Post (feed style) */
     .post{
       background:#fff;
       border:1px solid #e5e7eb;
@@ -102,55 +149,17 @@ include 'Components/barangayTopbar.php'; ?>
       gap:10px;
       word-wrap:break-word;
     }
-    .post .meta{font-size:13px;color:var(--muted);}
+    .meta{font-size:13px;color:var(--muted);}
     .post h3{margin:0;font-size:16px;color:#111;}
-
-    /* Description with truncation */
-    .post .desc{
-      font-size:14px;
-      overflow:hidden;
-      display:-webkit-box;
-      -webkit-line-clamp:3;
-      -webkit-box-orient:vertical;
-      text-overflow:ellipsis;
-      transition:max-height .3s ease;
-    }
-    .post.expanded .desc{
-      -webkit-line-clamp:unset;
-      overflow:visible;
-      max-height:1000px;
-    }
-
-    .see-toggle,.delete{
+    .delete{
       all:unset;
       cursor:pointer;
       font-size:14px;
       font-weight:600;
+      color:var(--error);
+      margin-top:4px;
     }
-    .see-toggle{color:#1e40af;}
-    .delete{color:var(--error);margin-top:4px;}
-
-    /* Responsive image wrapper */
-    .image-wrapper {
-      position: relative;
-      width: 100%;
-      max-height: 500px;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .image-wrapper img {
-      width: 100%;
-      height: auto;
-      max-height: 500px;
-      object-fit: contain;
-      display: block;
-    }
-
-    /* Responsive tweaks */
+    img{max-width:100%;border-radius:12px;margin-top:10px;}
     @media(max-width:600px){
       .card,.post{padding:12px;border-radius:10px;}
       h2{font-size:1.1rem;}
@@ -163,10 +172,13 @@ include 'Components/barangayTopbar.php'; ?>
 <div class="layout">
   <main class="main-content">
 
-    <!-- Create -->
+    <!-- ==========================================================
+         CREATE ANNOUNCEMENT
+    =========================================================== -->
     <section class="card">
       <h2>Create Announcement</h2>
-      <form id="announceForm" enctype="multipart/form-data">
+      <?php echo $msg; ?>
+      <form method="POST" enctype="multipart/form-data">
         <label>Title</label>
         <input type="text" name="title" required>
         <label>Description</label>
@@ -178,132 +190,51 @@ include 'Components/barangayTopbar.php'; ?>
           <option>Emergency</option>
         </select>
         <label>Image (optional)</label>
-        <input type="file" id="image" accept="image/*">
+        <input type="file" name="image" accept="image/*">
         <button type="submit" class="btn">Post Announcement</button>
-        <p id="msg"></p>
       </form>
     </section>
 
-    <!-- Feed -->
+    <!-- ==========================================================
+         ANNOUNCEMENT FEED
+    =========================================================== -->
     <section class="card">
       <h2>My Announcements</h2>
-      <div id="posts"></div>
+      <?php
+      $barangay_name = $_SESSION["barangay_name"] ?? "San Isidro";
+      $res = $conn->prepare("
+          SELECT id, title, description, category, image_url, created_at 
+          FROM announcements 
+          WHERE barangay_name = ? 
+          ORDER BY created_at DESC
+      ");
+      $res->bind_param("s", $barangay_name);
+      $res->execute();
+      $result = $res->get_result();
+
+      if ($result->num_rows === 0) {
+          echo "<p>No announcements yet.</p>";
+      } else {
+          while ($row = $result->fetch_assoc()) {
+              echo "<div class='post'>";
+              echo "<div class='meta'><strong>" . htmlspecialchars($row['category']) . "</strong> • " .
+                   date("F j, Y g:i A", strtotime($row['created_at'])) . "</div>";
+              echo "<h3>" . htmlspecialchars($row['title']) . "</h3>";
+              echo "<p>" . nl2br(htmlspecialchars($row['description'])) . "</p>";
+              if (!empty($row['image_url'])) {
+                  echo "<img src='" . htmlspecialchars($row['image_url']) . "' alt='Announcement Image'>";
+              }
+              echo "<form method='POST' style='margin-top:8px;'>
+                      <input type='hidden' name='delete_id' value='" . $row['id'] . "'>
+                      <button type='submit' name='delete' class='delete'>🗑 Delete</button>
+                    </form>";
+              echo "</div>";
+          }
+      }
+      ?>
     </section>
 
   </main>
 </div>
-
-<script>
-const SUPABASE_URL = "https://hlyjmgwpufqtghwnpgfe.supabase.co/";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWptZ3dwdWZxdGdod25wZ2ZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NzYxMjEsImV4cCI6MjA3MzM1MjEyMX0.G0ocq2K1DAHqM5zn3ZfyflUd5gH2QS27_TY548ZgEOw";
-const BARANGAY=localStorage.getItem("bg_name")||"San Isidro";
-
-/* ✅ Fixed Upload Image */
-async function uploadImage(file){
-  const fileName=Date.now()+"-"+file.name;
-  const formData=new FormData();
-  formData.append("file",file);
-
-  const res=await fetch(`${SUPABASE_URL}/storage/v1/object/announcements/${fileName}`,{
-    method:"POST",
-    headers:{
-      apikey:SUPABASE_KEY,
-      Authorization:"Bearer "+SUPABASE_KEY,
-      "x-upsert":"true"
-    },
-    body:formData
-  });
-  if(!res.ok) throw new Error("Upload failed: "+(await res.text()));
-  return `${SUPABASE_URL}/storage/v1/object/public/announcements/${fileName}`;
-}
-
-/* Submit Form */
-document.getElementById("announceForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const msg=document.getElementById("msg");
-  msg.textContent=""; msg.className="";
-
-  const title=e.target.title.value.trim();
-  const description=e.target.description.value.trim();
-  const category=e.target.category.value;
-  let image_url=null;
-
-  const file=document.getElementById("image").files[0];
-  if(file){ try{ image_url=await uploadImage(file);}catch(err){msg.className="error";msg.textContent=err.message;return;} }
-
-  const data={title,description,category,barangay_name:BARANGAY,image_url};
-  const res=await fetch(`${SUPABASE_URL}/rest/v1/announcements`,{
-    method:"POST",
-    headers:{
-      apikey:SUPABASE_KEY,
-      Authorization:"Bearer "+SUPABASE_KEY,
-      "Content-Type":"application/json",
-      Prefer:"return=representation"
-    },
-    body:JSON.stringify(data)
-  });
-  const result=await res.json();
-
-  if(res.ok){
-    msg.className="ok";msg.textContent="✅ Posted!";
-    e.target.reset();
-    loadPosts();
-  } else {
-    msg.className="error";msg.textContent="❌ "+(result.message||JSON.stringify(result));
-  }
-});
-
-/* Load Posts */
-async function loadPosts(){
-  const postsEl=document.getElementById("posts");
-  postsEl.innerHTML="";
-  const res=await fetch(`${SUPABASE_URL}/rest/v1/announcements?barangay_name=eq.${BARANGAY}&order=created_at.desc`,{
-    headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}
-  });
-  const data=await res.json();
-  if(!data.length){postsEl.innerHTML="<p>No announcements yet.</p>";return;}
-
-  data.forEach(p=>{
-    const div=document.createElement("div");
-    div.className="post";
-    div.innerHTML=`
-      <div class="meta"><strong>${p.category}</strong> • ${new Date(p.created_at).toLocaleDateString()}</div>
-      <h3>${p.title}</h3>
-      <p class="desc">${p.description}</p>
-      ${p.image_url?`<div class="image-wrapper"><img src="${p.image_url}" alt="Announcement image"></div>`:""}
-      <button class="delete" onclick="deletePost(${p.id})">🗑 Delete</button>
-    `;
-
-    // See More/See Less
-    const descEl=div.querySelector(".desc");
-    requestAnimationFrame(()=>{
-      if(descEl.scrollHeight>descEl.clientHeight){
-        const toggle=document.createElement("button");
-        toggle.className="see-toggle";
-        toggle.textContent="See More";
-        toggle.onclick=()=>{
-          div.classList.toggle("expanded");
-          toggle.textContent=div.classList.contains("expanded")?"See Less":"See More";
-        };
-        div.insertBefore(toggle,div.querySelector(".image-wrapper"));
-      }
-    });
-
-    postsEl.appendChild(div);
-  });
-}
-
-/* Delete Post */
-async function deletePost(id){
-  if(!confirm("Delete this post?")) return;
-  await fetch(`${SUPABASE_URL}/rest/v1/announcements?id=eq.${id}`,{
-    method:"DELETE",
-    headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}
-  });
-  loadPosts();
-}
-
-loadPosts();
-</script>
 </body>
 </html>
