@@ -1,5 +1,8 @@
-<?php include 'Components/barangaySidebar.php'; ?> 
-<?php include 'Components/barangayTopbar.php'; ?>
+<?php 
+require_once(__DIR__ . "/../Database/session-checker.php");
+requireRole("admin");
+include 'Components/barangaySidebar.php';
+include 'Components/barangayTopbar.php'; ?>
 
 <!DOCTYPE html>
 <html lang="en">
