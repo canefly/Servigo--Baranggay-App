@@ -1,3 +1,13 @@
+<?php
+// =======================================================
+// Barangay Topbar – Updated (Session-based display)
+// =======================================================
+require_once(__DIR__ . "/../../Database/connection.php");
+
+// Get barangay + admin name from session
+$adminName = $_SESSION['sg_name'] ?? 'Admin';
+$barangayName = $_SESSION['sg_brgy'] ?? '—';
+?>
 <!-- barangayTopbar.php -->
 <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -71,15 +81,15 @@ body { margin:0; font-family: system-ui, sans-serif; background: var(--bg); }
     <h1>Servigo · Barangay</h1>
   </div>
   <div class="right">
-    <span class="chip">Logged in as: <strong id="adminName">Admin</strong></span>
-    <span class="chip">Barangay: <strong id="barangayName">—</strong></span>
+    <span class="chip">Logged in as: <strong><?= htmlspecialchars($adminName) ?></strong></span>
+    <span class="chip">Barangay: <strong><?= htmlspecialchars($barangayName) ?></strong></span>
     <i class='bx bx-user user-icon'></i>
   </div>
 </header>
 
 <script>
-  document.getElementById('adminName').textContent =
-    localStorage.getItem('bg_admin') || 'Admin';
-  document.getElementById('barangayName').textContent =
-    localStorage.getItem('bg_name') || '—';
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar) sidebar.classList.toggle('active');
+}
 </script>
