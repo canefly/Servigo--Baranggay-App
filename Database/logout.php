@@ -1,23 +1,29 @@
 <?php
+// logout.php — Silent session destroyer
+
 session_start();
-require_once __DIR__ . "/connection.php"; // adjust path if needed
 
-// If user is logged in, log the logout event
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
+// Unset all session variables
+$_SESSION = [];
 
-    // Insert into login_audit (optional but recommended)
-    $stmt = $conn->prepare("INSERT INTO login_audit (user_id, action_type) VALUES (?, 'logout')");
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
+// Destroy the session cookie if it exists
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(
+        session_name(),
+        '',
+        time() - 42000,
+        $params["path"],
+        $params["domain"],
+        $params["secure"],
+        $params["httponly"]
+    );
 }
 
-// Destroy session
-$_SESSION = [];
-session_unset();
+// Destroy the session entirely
 session_destroy();
 
-// Redirect to login page
-header("Location: ../index.php");
+// Optional: Redirect silently to login page (or homepage)
+header("Location: loginPage.php");
 exit();
 ?>
