@@ -4,10 +4,15 @@ requireRole("resident");
 require_once(__DIR__ . "/../Database/connection.php");
 include 'Components/topbar.php';
 
-// 🧠 Get Barangay from session
-$barangay = $_SESSION['sg_brgy'] ?? 'Unknown Barangay';
+// 🧠 Make sure barangay_name matches admin session variable
+if (!isset($_SESSION['barangay_name']) && isset($_SESSION['sg_brgy'])) {
+    $_SESSION['barangay_name'] = $_SESSION['sg_brgy'];
+}
 
-// 🧩 Get Filters (from GET)
+// Barangay context
+$barangay = $_SESSION['barangay_name'] ?? 'Unknown Barangay';
+
+// 🧩 Filters
 $q        = trim($_GET['q'] ?? '');
 $from     = $_GET['from'] ?? '';
 $to       = $_GET['to'] ?? '';
@@ -57,7 +62,6 @@ $announcements = $result->fetch_all(MYSQLI_ASSOC);
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Servigo · Home (Residents)</title>
 <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-
 <style>
 :root {
   --bg:#f5f7fa; --card:#ffffff; --text:#222; --muted:#6b7280;
@@ -139,20 +143,29 @@ footer{color:var(--muted);text-align:center;padding:20px 12px;font-size:14px}
     <?php if (empty($announcements)): ?>
       <div class="empty">No results found for your filters.</div>
     <?php else: ?>
-      <?php foreach ($announcements as $item): ?>
+      <?php 
+      foreach ($announcements as $item): 
+          // Normalize image path dynamically in case /servigo/ prefix missing
+          $img = $item['image_url'];
+          if (!empty($img) && strpos($img, '/servigo/') === false) {
+              $base = dirname($_SERVER['SCRIPT_NAME'], 2);
+              $img = $base . $img;
+          }
+      ?>
         <article class="news">
           <div class="meta">
             <span class="tag <?= htmlspecialchars($item['category']) ?>">
               <?= htmlspecialchars($item['category']) ?>
             </span>
              • <?= htmlspecialchars($item['barangay_name']) ?>
-             • <?= date('F j, Y', strtotime($item['created_at'])) ?>
+             • <?= date('F j, Y g:i A', strtotime($item['created_at'])) ?>
           </div>
           <h3><?= htmlspecialchars($item['title']) ?></h3>
           <p class="desc"><?= nl2br(htmlspecialchars($item['description'])) ?></p>
-          <?php if (!empty($item['image_url'])): ?>
+          <?php if (!empty($img)): ?>
             <div class="image-wrapper">
-              <img src="<?= htmlspecialchars($item['image_url']) ?>" alt="Announcement Image" />
+              <img src="<?= htmlspecialchars($img) ?>" alt="Announcement Image" 
+                   onerror="this.style.display='none'" />
             </div>
           <?php endif; ?>
         </article>
@@ -166,7 +179,7 @@ footer{color:var(--muted);text-align:center;padding:20px 12px;font-size:14px}
 </footer>
 
 <script>
-// Optional: Keep “See More / See Less” functionality
+// Optional: See More / See Less toggle
 document.querySelectorAll('.news').forEach(el=>{
   const desc=el.querySelector('.desc');
   if(desc && desc.textContent.length>150){
