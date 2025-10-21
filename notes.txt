@@ -1,0 +1,34 @@
+SERVIGO/
+├── Barangay/
+│   ├── Components/
+│   │   ├── barangaySidebar.php
+│   │   ├── barangayTopbar.php
+│   ├── adminEvents.php
+│   ├── barangayAnnouncements.php
+│   ├── barangayLanding.php
+│   ├── barangayLogin.php
+│   ├── barangayRegister.php
+│   ├── dashboard.php
+│   ├── preset.php
+│   ├── requests.php
+│   ├── store.php
+│   ├── verification.php
+│   ├── B.png
+│   ├── M.png
+├── Database/
+│   ├── connection.php
+│   ├── logout.php
+│   ├── session-checker.php
+├── Resident/
+│   ├── Components/
+│   │   ├── logo.png
+│   │   ├── topbar.php
+│   ├── events.php
+│   ├── loginPage.php
+│   ├── permitsPage.php
+│   ├── registrationPage.php
+│   ├── residentsDB.php
+│   ├── residentsPage.php
+│   ├── storesPage.php
+│   ├── verifyAccount.php
+├── index.php

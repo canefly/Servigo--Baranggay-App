@@ -1,3 +1,43 @@
+<?php
+session_start();
+require_once(__DIR__ . "/../Database/connection.php");
+
+$error = "";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $email = trim($_POST['email'] ?? '');
+  $pass  = trim($_POST['password'] ?? '');
+
+  if ($email === '' || $pass === '') {
+    $error = "❌ Please enter both email and password.";
+  } else {
+    $stmt = $conn->prepare("SELECT id, first_name, barangay, email, password FROM residents WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($user = $result->fetch_assoc()) {
+      if ($user['password'] === $pass) {
+        $_SESSION['sg_id']     = $user['id'];
+        $_SESSION['sg_name']   = $user['first_name'];
+        $_SESSION['sg_brgy']   = $user['barangay'];
+        $_SESSION['sg_email']  = $user['email'];
+        $_SESSION['role']      = "resident";
+
+        header("Location: residentsPage.php");
+        exit();
+      } else {
+        $error = "❌ Incorrect password.";
+      }
+    } else {
+      $error = "❌ No account found with that email.";
+    }
+
+    $stmt->close();
+  }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,7 +134,11 @@
     </div>
     <p class="muted">Sign in to your barangay account</p>
 
-    <form id="loginForm" novalidate>
+    <?php if (!empty($error)): ?>
+      <p class="error"><?= $error ?></p>
+    <?php endif; ?>
+
+    <form method="POST" novalidate>
       <div>
         <label for="email">Email</label>
         <input id="email" name="email" type="email" class="input" placeholder="e.g., juan@demo.gov.ph" required />
@@ -109,7 +153,6 @@
       </div>
 
       <button class="btn" type="submit">Sign in</button>
-      <p class="error" id="error" hidden></p>
     </form>
 
     <p class="register-hint">
@@ -121,70 +164,14 @@
   </section>
 
   <script>
-    const SUPABASE_URL = "https://hlyjmgwpufqtghwnpgfe.supabase.co/";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWptZ3dwdWZxdGdod25wZ2ZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NzYxMjEsImV4cCI6MjA3MzM1MjEyMX0.G0ocq2K1DAHqM5zn3ZfyflUd5gH2QS27_TY548ZgEOw"; // 🔑 replace with your anon/public key
+    const pw = document.getElementById('password');
+    const tog = document.getElementById('togglePw');
 
-    const form = document.getElementById('loginForm');
-    const err  = document.getElementById('error');
-    const pw   = document.getElementById('password');
-    const tog  = document.getElementById('togglePw');
-
-    // toggle password visibility
     tog.addEventListener('click', () => {
       const isPw = pw.type === 'password';
       pw.type = isPw ? 'text' : 'password';
       tog.textContent = isPw ? 'Hide' : 'Show';
     });
-
-    form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    err.hidden = true;
-
-    const email = form.email.value.trim();
-    const pass  = form.password.value.trim();
-
-    if (!email || !pass) {
-      err.textContent = "❌ Please enter both email and password.";
-      err.hidden = false;
-      return;
-    }
-
-    try {
-      // query residents table
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/residents?email=eq.${encodeURIComponent(email)}`, {
-        method: "GET",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": "Bearer " + SUPABASE_KEY
-        }
-      });
-
-      const result = await res.json();
-
-      if (res.ok && result.length > 0) {
-        const user = result[0];
-        if (user.password === pass) {
-        // Save user info
-        localStorage.setItem("sg_id", user.id);          // ✅ add this
-        localStorage.setItem("sg_name", user.first_name);
-        localStorage.setItem("sg_brgy", user.barangay);
-        localStorage.setItem("sg_email", user.email);
-
-        alert("✅ Login successful. Welcome " + user.first_name + "!");
-        window.location.href = "residentsPage.php";
-      } else {
-          err.textContent = "❌ Incorrect password.";
-          err.hidden = false;
-        }
-      } else {
-        err.textContent = "❌ No account found with that email.";
-        err.hidden = false;
-      }
-    } catch (error) {
-      err.textContent = "❌ Error: " + error.message;
-      err.hidden = false;
-    }
-  });
   </script>
 </body>
 </html>
