@@ -20,11 +20,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($admin = $result->fetch_assoc()) {
       if ($admin['password'] === $pass) {
-        $_SESSION['sg_id']    = $admin['id'];
-        $_SESSION['sg_name']  = 'Admin';
-        $_SESSION['sg_brgy']  = $admin['barangay_name'];
-        $_SESSION['sg_email'] = $admin['email'];
-        $_SESSION['role']     = "admin";
+        // ✅ set all admin session values needed everywhere
+        $_SESSION['sg_id']          = $admin['id'];
+        $_SESSION['sg_name']        = 'Admin';
+        $_SESSION['sg_brgy']        = $admin['barangay_name'];
+        $_SESSION['sg_email']       = $admin['email'];
+        $_SESSION['role']           = "admin";
+
+        // 🟢 global unified keys used by other modules
+        $_SESSION['barangay_name']  = $admin['barangay_name'];
+        $_SESSION['admin_email']    = $admin['email'];
 
         header("Location: Barangay/dashboard.php");
         exit();
@@ -40,11 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       if ($user = $res2->fetch_assoc()) {
         if ($user['password'] === $pass) {
-          $_SESSION['sg_id']    = $user['id'];
-          $_SESSION['sg_name']  = $user['first_name'];
-          $_SESSION['sg_brgy']  = $user['barangay'];
-          $_SESSION['sg_email'] = $user['email'];
-          $_SESSION['role']     = "resident";
+          $_SESSION['sg_id']         = $user['id'];
+          $_SESSION['sg_name']       = $user['first_name'];
+          $_SESSION['sg_brgy']       = $user['barangay'];
+          $_SESSION['sg_email']      = $user['email'];
+          $_SESSION['role']          = "resident";
+
+          // 🟢 unified key for residents too
+          $_SESSION['barangay_name'] = $user['barangay'];
 
           header("Location: Resident/residentsPage.php");
           exit();
