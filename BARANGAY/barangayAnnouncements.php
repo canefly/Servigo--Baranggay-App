@@ -1,6 +1,6 @@
 <?php
 // =======================================================
-// Barangay Announcements (Native SQL version)
+// Barangay Announcements (Dynamic SQL version)
 // =======================================================
 require_once(__DIR__ . "/../Database/session-checker.php");
 requireRole("admin");
@@ -8,23 +8,57 @@ require_once(__DIR__ . "/../Database/connection.php");
 include 'Components/barangaySidebar.php';
 include 'Components/barangayTopbar.php';
 
-// Handle Deletion before HTML render to prevent output errors
+/* ==========================================================
+   GET ADMIN'S BARANGAY NAME
+========================================================== */
+
+// 1️⃣ Check if barangay_name already exists in session (cached)
+if (!isset($_SESSION["barangay_name"])) {
+    // 2️⃣ If not, fetch it from barangay_admins using the admin's email
+    if (isset($_SESSION["admin_email"])) {
+        $admin_email = $_SESSION["admin_email"];
+
+        $getBarangay = $conn->prepare("SELECT barangay_name FROM barangay_admins WHERE email = ?");
+        $getBarangay->bind_param("s", $admin_email);
+        $getBarangay->execute();
+        $getBarangay->bind_result($barangay_name);
+        $getBarangay->fetch();
+        $getBarangay->close();
+
+        // 3️⃣ Store it in session for reuse
+        if (!empty($barangay_name)) {
+            $_SESSION["barangay_name"] = $barangay_name;
+        } else {
+            die("<h3 style='color:red;text-align:center;margin-top:50px;'>⚠️ Barangay name not found for this admin. Check barangay_admins table.</h3>");
+        }
+    } else {
+        die("<h3 style='color:red;text-align:center;margin-top:50px;'>⚠️ Admin email missing from session. Please re-login.</h3>");
+    }
+}
+
+// Now barangay name is guaranteed to exist
+$barangay_name = $_SESSION["barangay_name"];
+
+/* ==========================================================
+   DELETE ANNOUNCEMENT
+========================================================== */
 if (isset($_POST["delete"]) && !empty($_POST["delete_id"])) {
     $del_id = intval($_POST["delete_id"]);
     $del = $conn->prepare("DELETE FROM announcements WHERE id = ?");
     $del->bind_param("i", $del_id);
     $del->execute();
-    header("Location: announcements.php");
+    header("Location: barangayAnnouncements.php");
     exit();
 }
 
-// Handle Create
+/* ==========================================================
+   CREATE ANNOUNCEMENT
+========================================================== */
 $msg = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["title"]) && !isset($_POST["delete"])) {
     $title = trim($_POST["title"]);
     $description = trim($_POST["description"]);
     $category = $_POST["category"];
-    $barangay_name = $_SESSION["barangay_name"] ?? "San Isidro";
     $image_url = null;
     $image_path = null;
 
@@ -38,7 +72,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["title"]) && !isset($_
         $target_path = $upload_dir . $file_name;
 
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_path)) {
-            $image_url = "/servigo/uploads/announcements/" . $file_name;
+            $base_url = dirname($_SERVER['SCRIPT_NAME'], 2);
+            $image_url = $base_url . "/uploads/announcements/" . $file_name;
             $image_path = $target_path;
         } else {
             $msg = "<p class='error'>❌ Failed to upload image.</p>";
@@ -84,7 +119,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["title"]) && !isset($_
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{
-      margin:0;
       background:var(--bg);
       color:var(--text);
       font-family:system-ui,sans-serif;
@@ -107,77 +141,42 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["title"]) && !isset($_
     h2{margin-bottom:12px;font-size:1.25rem;color:var(--brand);}
     label{font-weight:600;display:block;margin-top:12px;}
     input,textarea,select{
-      width:100%;
-      padding:12px;
-      font-size:15px;
-      margin-top:6px;
-      border:1px solid #e5e7eb;
-      border-radius:10px;
+      width:100%;padding:12px;font-size:15px;margin-top:6px;
+      border:1px solid #e5e7eb;border-radius:10px;
     }
     textarea{resize:vertical;min-height:100px;}
     .btn{
-      width:100%;
-      margin-top:16px;
-      padding:12px;
-      border-radius:10px;
-      border:none;
+      width:100%;margin-top:16px;padding:12px;border-radius:10px;border:none;
       background:linear-gradient(135deg,var(--brand),var(--accent));
-      color:#fff;
-      font-weight:600;
-      cursor:pointer;
-      text-align:center;
-      transition:.2s;
+      color:#fff;font-weight:600;cursor:pointer;text-align:center;transition:.2s;
     }
     .btn:hover{opacity:.9;}
     .error,.ok{
-      margin-top:10px;
-      padding:10px;
-      border-radius:8px;
-      font-size:.9rem;
+      margin-top:10px;padding:10px;border-radius:8px;font-size:.9rem;
     }
     .error{background:#fee2e2;color:var(--error);border:1px solid #ef4444;}
     .ok{background:#dcfce7;color:var(--ok);border:1px solid #22c55e;}
     .post{
-      background:#fff;
-      border:1px solid #e5e7eb;
-      border-radius:12px;
-      padding:14px;
-      margin-bottom:16px;
-      box-shadow:0 2px 6px rgba(0,0,0,.05);
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      word-wrap:break-word;
+      background:#fff;border:1px solid #e5e7eb;border-radius:12px;
+      padding:14px;margin-bottom:16px;box-shadow:0 2px 6px rgba(0,0,0,.05);
+      display:flex;flex-direction:column;gap:10px;word-wrap:break-word;
     }
     .meta{font-size:13px;color:var(--muted);}
     .post h3{margin:0;font-size:16px;color:#111;}
     .delete{
-      all:unset;
-      cursor:pointer;
-      font-size:14px;
-      font-weight:600;
-      color:var(--error);
-      margin-top:4px;
+      all:unset;cursor:pointer;font-size:14px;font-weight:600;
+      color:var(--error);margin-top:4px;
     }
     img{max-width:100%;border-radius:12px;margin-top:10px;}
-    @media(max-width:600px){
-      .card,.post{padding:12px;border-radius:10px;}
-      h2{font-size:1.1rem;}
-      .post h3{font-size:15px;}
-      .btn{font-size:14px;padding:10px;}
-    }
   </style>
 </head>
 <body>
 <div class="layout">
   <main class="main-content">
 
-    <!-- ==========================================================
-         CREATE ANNOUNCEMENT
-    =========================================================== -->
     <section class="card">
       <h2>Create Announcement</h2>
-      <?php echo $msg; ?>
+      <?= $msg ?>
       <form method="POST" enctype="multipart/form-data">
         <label>Title</label>
         <input type="text" name="title" required>
@@ -195,13 +194,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["title"]) && !isset($_
       </form>
     </section>
 
-    <!-- ==========================================================
-         ANNOUNCEMENT FEED
-    =========================================================== -->
     <section class="card">
       <h2>My Announcements</h2>
       <?php
-      $barangay_name = $_SESSION["barangay_name"] ?? "San Isidro";
       $res = $conn->prepare("
           SELECT id, title, description, category, image_url, created_at 
           FROM announcements 
