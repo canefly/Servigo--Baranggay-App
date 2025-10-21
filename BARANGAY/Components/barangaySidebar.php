@@ -110,7 +110,7 @@
       <li><a href="requests.php"><i class='bx bx-file'></i><span> Requests</span></a></li>
       <li><a href="adminEvents.php"><i class='bx bx-file'></i><span> Events</span></a></li>
       <li><a href="store.php"><i class='bx bx-cog'></i><span> Store</span></a></li>
-      <li><a href="/../Database/logout.php"><i class='bx bx-log-out'></i><span> Logout</span></a></li>
+      <li><a href="../Database/logout.php"><i class='bx bx-log-out'></i><span> Logout</span></a></li>
     </ul>
   </nav>
   <div class="sidebar-footer">© 2025 Servigo · Barangay</div>
