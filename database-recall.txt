@@ -1,0 +1,158 @@
+This information is used to determine whats the content of the database.
+
+DATABASE: svg
+
+1. barangay_admins
+
+   * id (PK, bigint)
+   * barangay_name
+   * city
+   * province
+   * region
+   * email (unique)
+   * password
+   * contact_no
+   * created_at (datetime)
+
+   Sample Data:
+   admin1 / asdf1234
+
+---
+
+2. residents
+
+   * id (PK, bigint)
+   * last_name
+   * first_name
+   * middle_name
+   * suffix
+   * phone
+   * email (unique)
+   * birthdate
+   * house_no
+   * street
+   * purok
+   * subdivision
+   * barangay
+   * city
+   * province
+   * region
+   * postal
+   * nationality
+   * agree (boolean)
+   * updates (boolean)
+   * created_at (datetime)
+   * verification_status (Unverified / Verified)
+   * password
+
+   Sample Data:
+   resident1 / asdf1234
+
+---
+
+3. announcements
+
+   * id (PK, bigint)
+   * barangay_name
+   * title
+   * description
+   * category (default: Advisory)
+   * image_url
+   * image_path
+   * created_at (datetime)
+
+---
+
+4. barangay_events
+
+   * id (PK, bigint)
+   * barangay_name
+   * title
+   * description
+   * category (default: General)
+   * venue
+   * start_date
+   * end_date
+   * visibility (public/private)
+   * linked_announcement_id (FK → announcements.id)
+   * created_at (datetime)
+
+---
+
+5. event_interest
+
+   * id (PK, bigint)
+   * event_id (FK → barangay_events.id)
+   * resident_id (FK → residents.id)
+   * created_at (datetime)
+
+---
+
+6. notifications
+
+   * id (PK, bigint)
+   * barangay_name
+   * recipient_type (Resident/Admin)
+   * recipient_id
+   * source_table
+   * source_id
+   * type
+   * title
+   * message
+   * link
+   * is_read (0/1)
+   * created_at (datetime)
+
+---
+
+7. resident_verifications
+
+   * id (PK, bigint)
+   * resident_id (FK → residents.id)
+   * id_type
+   * valid_id_url
+   * submitted_at (datetime)
+   * status (Pending / Approved / Declined)
+   * reviewed_by
+   * reviewed_at
+   * remarks
+
+---
+
+8. verification_rejects
+
+   * id (PK, bigint)
+   * resident_id (FK → residents.id)
+   * id_type
+   * valid_id_url
+   * reason
+   * rejected_at (datetime)
+   * reviewed_by
+
+---
+
+9. REQUEST TABLES (All linked to residents.id)
+   Common fields:
+   id, resident_id, fullname, email, phone, purpose, valid_id_url, barangay_name,
+   status (Pending/Approved), created_at, permit_type, house_street, city, province
+
+   * barangay_clearance_requests → Barangay Clearance
+   * business_permit_requests → Business Permit
+   * goodmoral_requests → Certificate of Good Moral Character
+   * indigency_requests → Certificate of Indigency
+   * latebirth_requests → Certificate of Late Birth Registration
+   * norecord_requests → Certificate of No Record
+   * ojt_requests → Certificate of OJT / Training Endorsement
+   * residency_requests → Residency Certificate
+   * soloparent_requests → Certificate of Solo Parent
+
+---
+
+RELATIONSHIP SUMMARY
+
+* barangay_admins → independent (login table)
+* residents → central table
+* All *_requests tables → reference residents(id)
+* resident_verifications, verification_rejects → reference residents(id)
+* barangay_events → links to announcements
+* event_interest → links to barangay_events and residents
