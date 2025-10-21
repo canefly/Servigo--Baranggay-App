@@ -1,4 +1,8 @@
-<?php include 'Components/topbar.php'; ?>
+<?php  
+require_once(__DIR__ . "/../Database/session-checker.php");
+requireRole("resident");
+include 'Components/topbar.php';
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -10,157 +14,60 @@
 
 <style>
 :root {
-  --bg:#f5f7fa; 
-  --card:#ffffff; 
-  --text:#222; 
-  --muted:#6b7280;
-  --brand:#1e40af; 
-  --accent:#16a34a; 
-  --border:#e5e7eb;
-  --shadow:0 2px 8px rgba(0,0,0,.08); 
-  --radius:16px; 
-  --gap:14px; 
-  --pad:14px;
+  --bg:#f5f7fa; --card:#ffffff; --text:#222; --muted:#6b7280;
+  --brand:#1e40af; --accent:#16a34a; --border:#e5e7eb;
+  --shadow:0 2px 8px rgba(0,0,0,.08); --radius:16px; --gap:14px; --pad:14px;
 }
-
 *{box-sizing:border-box}
 body{
-  margin:0;
-  font-family:system-ui,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.5;
+  margin:0;font-family:system-ui,sans-serif;background:var(--bg);
+  color:var(--text);line-height:1.5;
 }
 .container{max-width:1100px;margin:0 auto;padding:16px}
-
-/* Nav tabs */
-.navtabs{
-  display:flex; gap:8px; justify-content:center;
-  background:#f9fafb; padding:10px; border-bottom:1px solid var(--border);
-  flex-wrap:wrap;
-}
-.tabbtn{
-  all:unset; cursor:pointer; font-weight:600;
-  padding:8px 14px; border-radius:10px;
-  color:var(--text); border:1px solid var(--border); background:#f3f4f6;
-}
-.tabbtn.active{
-  background:linear-gradient(135deg,var(--brand),var(--accent));
-  color:#fff; font-weight:700;
-}
-
-/* Filter card */
-.card{
-  background:var(--card);
-  border:1px solid var(--border); 
-  border-radius:var(--radius);
-  padding:var(--pad); 
-  box-shadow:var(--shadow);
-  margin-bottom:20px;
-}
-h2{margin-top:0;color:var(--brand)}
-.muted{color:var(--muted)}
+.navtabs{display:flex;gap:8px;justify-content:center;background:#f9fafb;
+  padding:10px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.tabbtn{all:unset;cursor:pointer;font-weight:600;padding:8px 14px;border-radius:10px;
+  color:var(--text);border:1px solid var(--border);background:#f3f4f6;}
+.tabbtn.active{background:linear-gradient(135deg,var(--brand),var(--accent));
+  color:#fff;font-weight:700;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:var(--pad);box-shadow:var(--shadow);margin-bottom:20px;}
+h2{margin-top:0;color:var(--brand)}.muted{color:var(--muted)}
 .divider{height:1px;background:var(--border);margin:12px 0}
-
-.controls{
-  display:grid;
-  grid-template-columns:1fr auto auto;
-  gap:var(--gap);
-  align-items:end
-}
-@media(max-width:780px){
-  .controls{grid-template-columns:1fr}
-  .controls .full{grid-column:1/-1}
-}
-
+.controls{display:grid;grid-template-columns:1fr auto auto;gap:var(--gap);align-items:end}
+@media(max-width:780px){.controls{grid-template-columns:1fr}
+  .controls .full{grid-column:1/-1}}
 label{font-size:14px;font-weight:600;margin-bottom:4px;display:block}
-.input{
-  width:100%;padding:12px;border-radius:12px;
-  border:1px solid var(--border);font-size:15px
-}
-
+.input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);
+  font-size:15px}
 .catbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.chipbtn{
-  all:unset;cursor:pointer;padding:10px 14px;
-  border-radius:999px;border:1px solid var(--border);
-  color:var(--brand);background:#f9fafb;font-size:14px
-}
-.chipbtn.active{
-  background:linear-gradient(135deg,var(--brand),var(--accent));
-  color:#fff;border:none
-}
-.ghost{
-  all:unset;cursor:pointer;padding:9px 12px;
-  border-radius:10px;background:#f3f4f6;
-  border:1px solid var(--border);font-weight:600;color:var(--text)
-}
-
-/* News feed */
-.news{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:12px;
-  box-shadow:var(--shadow);
-  padding:14px 16px;
-  margin-bottom:16px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  word-wrap:break-word;
-}
+.chipbtn{all:unset;cursor:pointer;padding:10px 14px;border-radius:999px;
+  border:1px solid var(--border);color:var(--brand);background:#f9fafb;font-size:14px}
+.chipbtn.active{background:linear-gradient(135deg,var(--brand),var(--accent));
+  color:#fff;border:none}
+.ghost{all:unset;cursor:pointer;padding:9px 12px;border-radius:10px;background:#f3f4f6;
+  border:1px solid var(--border);font-weight:600;color:var(--text)}
+.news{background:#fff;border:1px solid var(--border);border-radius:12px;
+  box-shadow:var(--shadow);padding:14px 16px;margin-bottom:16px;display:flex;
+  flex-direction:column;gap:10px;word-wrap:break-word;}
 .news .meta{font-size:13px;color:var(--muted)}
 .news h3{margin:0;font-size:16px;color:#111}
-.news .desc{
-  margin:0;color:var(--text);font-size:14px;line-height:1.4;
-  overflow:hidden;
-  white-space:pre-wrap;
-  max-height:6.2em; /* ~4 lines */
-}
+.news .desc{margin:0;color:var(--text);font-size:14px;line-height:1.4;
+  overflow:hidden;white-space:pre-wrap;max-height:6.2em;}
 .news.expanded .desc{max-height:none}
-.news .see-toggle{
-  all:unset;
-  cursor:pointer;
-  color:var(--brand);
-  font-weight:600;
-  font-size:14px;
-  margin-top:4px;
-  align-self:flex-start;
-}
-
-/* Image handling */
-.image-wrapper{
-  position:relative;width:100%;
-  border-radius:10px;overflow:hidden;
-  background:#f0f0f0;
-}
-.image-wrapper img{
-  width:100%;
-  height:auto;
-  display:block;
-  object-fit:contain; /* ✅ ensures no cutoff */
-  max-height:500px;
-}
-
-/* Empty state + footer */
-.empty{
-  padding:16px;text-align:center;
-  color:var(--muted);
-  border:1px dashed var(--border);
-  border-radius:12px
-}
-footer{
-  color:var(--muted);
-  text-align:center;
-  padding:20px 12px;
-  font-size:14px
-}
+.news .see-toggle{all:unset;cursor:pointer;color:var(--brand);font-weight:600;
+  font-size:14px;margin-top:4px;align-self:flex-start;}
+.image-wrapper{position:relative;width:100%;border-radius:10px;overflow:hidden;
+  background:#f0f0f0;}
+.image-wrapper img{width:100%;height:auto;display:block;object-fit:contain;
+  max-height:500px;}
+.empty{padding:16px;text-align:center;color:var(--muted);
+  border:1px dashed var(--border);border-radius:12px}
+footer{color:var(--muted);text-align:center;padding:20px 12px;font-size:14px}
 </style>
 </head>
 <body>
 
-
-
-<!-- Navtabs -->
 <nav class="navtabs">
   <a href="residentsPage.php" class="tabbtn active">News</a>
   <a href="permitsPage.php" class="tabbtn">Permits</a>
@@ -169,10 +76,9 @@ footer{
 </nav>
 
 <main class="container" id="app" tabindex="-1">
-  <!-- Filter section -->
   <section class="card" aria-labelledby="news-title">
     <h2 id="news-title">Barangay News & Advisories</h2>
-    <p class="muted">Showing updates  <strong id="brgyName"></strong>.</p>
+    <p class="muted">Showing updates <strong id="brgyName"></strong>.</p>
     <div class="divider"></div>
 
     <div class="controls" style="margin-bottom:10px">
@@ -200,7 +106,6 @@ footer{
     </div>
   </section>
 
-  <!-- Feed -->
   <section id="newsGrid" aria-live="polite"></section>
   <div id="emptyState" class="empty" hidden>No results found for your filters.</div>
 </main>
@@ -210,8 +115,6 @@ footer{
 </footer>
 
 <script>
-const SUPABASE_URL = "https://hlyjmgwpufqtghwnpgfe.supabase.co/";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWptZ3dwdWZxdGdod25wZ2ZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NzYxMjEsImV4cCI6MjA3MzM1MjEyMX0.G0ocq2K1DAHqM5zn3ZfyflUd5gH2QS27_TY548ZgEOw";
 const storage={get brgy(){return localStorage.getItem('sg_brgy')||'BARANGAY';}};
 const brgyName=document.getElementById('brgyName');
 const grid=document.getElementById('newsGrid');
@@ -226,17 +129,10 @@ const catBtns=[...document.querySelectorAll('.chipbtn[data-cat]')];
 let activeCat='All';let announcements=[];
 
 async function loadAnnouncements(){
-  const savedBrgy = localStorage.getItem("sg_brgy") || "Unknown Barangay";
-  document.getElementById("brgyName").textContent = savedBrgy;
-
-
-  const res = await fetch(`${SUPABASE_URL}rest/v1/announcements?barangay_name=eq.${savedBrgy}&order=created_at.desc`, {
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: "Bearer " + SUPABASE_KEY
-    }
-  });
+  const res = await fetch('api/getAnnouncements.php');
   announcements = await res.json();
+  const savedBrgy = localStorage.getItem('sg_brgy') || (announcements[0]?.barangay_name || 'Unknown Barangay');
+  document.getElementById('brgyName').textContent = savedBrgy;
   render();
 }
 
@@ -255,25 +151,20 @@ function applyFilters(items){
 function newsCard(item){
   const el=document.createElement('article');el.className='news';
   const desc=document.createElement('p');desc.className='desc';desc.textContent=item.description||'';
-  el.innerHTML=`<div class="meta"><span class="tag ${item.category}">${item.category}</span> • ${item.barangay_name} • ${new Date(item.created_at).toLocaleDateString()}</div>
+  el.innerHTML=`<div class=\"meta\"><span class=\"tag ${item.category}\">${item.category}</span> • ${item.barangay_name} • ${new Date(item.created_at).toLocaleDateString()}</div>
                 <h3>${item.title}</h3>`;
   el.appendChild(desc);
-
-  // See More / See Less
   if(item.description && item.description.length > 150){
     const toggle=document.createElement('button');
-    toggle.className="see-toggle";
-    toggle.textContent="See More";
-    toggle.onclick=()=>{
-      el.classList.toggle("expanded");
-      toggle.textContent = el.classList.contains("expanded") ? "See Less" : "See More";
-    };
+    toggle.className=\"see-toggle\";
+    toggle.textContent=\"See More\";
+    toggle.onclick=()=>{el.classList.toggle(\"expanded\");
+      toggle.textContent = el.classList.contains(\"expanded\") ? \"See Less\" : \"See More\";};
     el.appendChild(toggle);
   }
-
   if(item.image_url){
     const wrapper=document.createElement('div');wrapper.className='image-wrapper';
-    const img=document.createElement('img');img.src=item.image_url;img.alt="Announcement image";
+    const img=document.createElement('img');img.src=item.image_url;img.alt=\"Announcement image\";
     wrapper.appendChild(img);el.appendChild(wrapper);
   }
   return el;
