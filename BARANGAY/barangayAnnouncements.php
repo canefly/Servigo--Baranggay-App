@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["title"]) && !isset($_
         $target_path = $upload_dir . $file_name;
 
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_path)) {
-            $image_url = "/uploads/announcements/" . $file_name;
+            $image_url = "/servigo/uploads/announcements/" . $file_name;
             $image_path = $target_path;
         } else {
             $msg = "<p class='error'>❌ Failed to upload image.</p>";
