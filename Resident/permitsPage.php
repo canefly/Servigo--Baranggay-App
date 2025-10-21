@@ -1,3 +1,5 @@
+<?php include 'Components/topbar.php'; ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -134,7 +136,7 @@
 </head>
 <body>
 
-<?php include 'INCLUDES/topbar.php'; ?>
+
 
 <nav class="navtabs">
   <a href="residentsPage.php" class="tabbtn">News</a>

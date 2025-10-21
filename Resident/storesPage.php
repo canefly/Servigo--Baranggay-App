@@ -1,3 +1,5 @@
+<?php include 'Components/topbar.php'; ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -108,7 +110,7 @@ footer{color:var(--muted);text-align:center;padding:20px 12px;font-size:14px}
 </style>
 </head>
 <body>
-<?php include 'INCLUDES/topbar.php'; ?>
+
 <nav class="navtabs">
   <a href="residentsPage.php" class="tabbtn">News</a>
   <a href="permitsPage.php" class="tabbtn ">Permits</a>

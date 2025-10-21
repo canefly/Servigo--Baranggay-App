@@ -1,3 +1,5 @@
+<?php include 'Components/topbar.php'; ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,7 +98,7 @@ footer{
 </head>
 <body>
 
-<?php include 'INCLUDES/topbar.php'; ?>
+
 
 <!-- Navtabs -->
 <nav class="navtabs">

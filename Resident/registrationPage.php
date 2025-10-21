@@ -1,3 +1,5 @@
+<?php include 'Components/topbar.php'; ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,13 +24,7 @@
 }
 
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.5;
-}
+body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);}
 .container{max-width:1100px;margin:0 auto;padding:16px}
 
 /* Nav tabs */
@@ -59,39 +55,14 @@ body{
 h2{margin-top:0;color:var(--brand)}
 .muted{color:var(--muted)}
 .divider{height:1px;background:var(--border);margin:12px 0}
-
-.controls{
-  display:grid;
-  grid-template-columns:1fr auto auto;
-  gap:var(--gap);
-  align-items:end
-}
-@media(max-width:780px){
-  .controls{grid-template-columns:1fr}
-  .controls .full{grid-column:1/-1}
-}
-
+.controls{display:grid;grid-template-columns:1fr auto auto;gap:var(--gap);align-items:end}
+@media(max-width:780px){.controls{grid-template-columns:1fr}.controls .full{grid-column:1/-1}}
 label{font-size:14px;font-weight:600;margin-bottom:4px;display:block}
-.input{
-  width:100%;padding:12px;border-radius:12px;
-  border:1px solid var(--border);font-size:15px
-}
-
-.catbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.chipbtn{
-  all:unset;cursor:pointer;padding:10px 14px;
-  border-radius:999px;border:1px solid var(--border);
-  color:var(--brand);background:#f9fafb;font-size:14px
-}
-.chipbtn.active{
-  background:linear-gradient(135deg,var(--brand),var(--accent));
-  color:#fff;border:none
-}
-.ghost{
-  all:unset;cursor:pointer;padding:9px 12px;
-  border-radius:10px;background:#f3f4f6;
-  border:1px solid var(--border);font-weight:600;color:var(--text)
-}
+.input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);font-size:15px}
+.catbar{display:flex;gap:8px;flex-wrap:wrap}
+.chipbtn{all:unset;cursor:pointer;padding:10px 14px;border-radius:999px;border:1px solid var(--border);color:var(--brand);background:#f9fafb;font-size:14px}
+.chipbtn.active{background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;border:none}
+.ghost{all:unset;cursor:pointer;padding:9px 12px;border-radius:10px;background:#f3f4f6;border:1px solid var(--border);font-weight:600;color:var(--text)}
 
 /* News feed */
 .news{
@@ -108,13 +79,32 @@ label{font-size:14px;font-weight:600;margin-bottom:4px;display:block}
 }
 .news .meta{font-size:13px;color:var(--muted)}
 .news h3{margin:0;font-size:16px;color:#111}
+
+/* Truncated description */
 .news .desc{
   margin:0;color:var(--text);font-size:14px;line-height:1.4;
   overflow:hidden;
-  white-space:pre-wrap;
-  max-height:6.2em; /* ~4 lines */
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  text-overflow:ellipsis;
+  position:relative;
+  transition:max-height .3s ease;
 }
-.news.expanded .desc{max-height:none}
+.news.truncated .desc::after{
+  content:"";
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:2em;
+  background:linear-gradient(to bottom,rgba(255,255,255,0),#fff);
+}
+.news.expanded .desc{
+  -webkit-line-clamp:unset;
+  overflow:visible;
+  max-height:1000px;
+}
+.news.expanded .desc::after{display:none;}
+
 .news .see-toggle{
   all:unset;
   cursor:pointer;
@@ -125,52 +115,29 @@ label{font-size:14px;font-weight:600;margin-bottom:4px;display:block}
   align-self:flex-start;
 }
 
-/* Image handling */
-.image-wrapper{
-  position:relative;width:100%;
-  border-radius:10px;overflow:hidden;
-  background:#f0f0f0;
-}
-.image-wrapper img{
-  width:100%;
-  height:auto;
-  display:block;
-  object-fit:contain; /* ✅ ensures no cutoff */
-  max-height:500px;
-}
+/* Image */
+.image-wrapper{position:relative;width:100%;border-radius:10px;overflow:hidden;background:#f0f0f0}
+.image-wrapper img{width:100%;height:auto;object-fit:contain;display:block;max-height:500px}
 
 /* Empty state + footer */
-.empty{
-  padding:16px;text-align:center;
-  color:var(--muted);
-  border:1px dashed var(--border);
-  border-radius:12px
-}
-footer{
-  color:var(--muted);
-  text-align:center;
-  padding:20px 12px;
-  font-size:14px
-}
+.empty{padding:16px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:12px}
+footer{color:var(--muted);text-align:center;padding:20px 12px;font-size:14px}
 </style>
 </head>
 <body>
 
-<?php include 'INCLUDES/topbar.php'; ?>
-
-<!-- Navtabs -->
+<!-- ✅ Navtabs -->
 <nav class="navtabs">
   <a href="residentsPage.php" class="tabbtn active">News</a>
   <a href="permitsPage.php" class="tabbtn">Permits</a>
   <a href="storesPage.php" class="tabbtn">Stores</a>
-  <a href="events.php" class="tabbtn">Events</a>
 </nav>
 
 <main class="container" id="app" tabindex="-1">
-  <!-- Filter section -->
+  <!-- Filter -->
   <section class="card" aria-labelledby="news-title">
     <h2 id="news-title">Barangay News & Advisories</h2>
-    <p class="muted">Showing updates  <strong id="brgyName"></strong>.</p>
+    <p class="muted">Showing updates for <strong id="brgyName">San Isidro</strong>.</p>
     <div class="divider"></div>
 
     <div class="controls" style="margin-bottom:10px">
@@ -210,6 +177,7 @@ footer{
 <script>
 const SUPABASE_URL = "https://hlyjmgwpufqtghwnpgfe.supabase.co/";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWptZ3dwdWZxdGdod25wZ2ZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NzYxMjEsImV4cCI6MjA3MzM1MjEyMX0.G0ocq2K1DAHqM5zn3ZfyflUd5gH2QS27_TY548ZgEOw";
+
 const storage={get brgy(){return localStorage.getItem('sg_brgy')||'BARANGAY';}};
 const brgyName=document.getElementById('brgyName');
 const grid=document.getElementById('newsGrid');
@@ -224,20 +192,12 @@ const catBtns=[...document.querySelectorAll('.chipbtn[data-cat]')];
 let activeCat='All';let announcements=[];
 
 async function loadAnnouncements(){
-  const savedBrgy = localStorage.getItem("sg_brgy") || "Unknown Barangay";
-  document.getElementById("brgyName").textContent = savedBrgy;
-
-
-  const res = await fetch(`${SUPABASE_URL}rest/v1/announcements?barangay_name=eq.${savedBrgy}&order=created_at.desc`, {
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: "Bearer " + SUPABASE_KEY
-    }
+  brgyName.textContent=storage.brgy;
+  const res=await fetch(`${SUPABASE_URL}rest/v1/announcements?barangay_name=eq.${storage.brgy}&order=created_at.desc`,{
+    headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}
   });
-  announcements = await res.json();
-  render();
+  announcements=await res.json();render();
 }
-
 function currentFilters(){
   const term=q.value.trim().toLowerCase();
   const f=from.value?new Date(from.value):null;
@@ -252,22 +212,28 @@ function applyFilters(items){
 }
 function newsCard(item){
   const el=document.createElement('article');el.className='news';
-  const desc=document.createElement('p');desc.className='desc';desc.textContent=item.description||'';
   el.innerHTML=`<div class="meta"><span class="tag ${item.category}">${item.category}</span> • ${item.barangay_name} • ${new Date(item.created_at).toLocaleDateString()}</div>
                 <h3>${item.title}</h3>`;
+  
+  const desc=document.createElement('p');
+  desc.className='desc';
+  desc.textContent=item.description||'';
   el.appendChild(desc);
 
-  // See More / See Less
-  if(item.description && item.description.length > 150){
-    const toggle=document.createElement('button');
-    toggle.className="see-toggle";
-    toggle.textContent="See More";
-    toggle.onclick=()=>{
-      el.classList.toggle("expanded");
-      toggle.textContent = el.classList.contains("expanded") ? "See Less" : "See More";
-    };
-    el.appendChild(toggle);
-  }
+  // ✅ See More only if truncated
+  requestAnimationFrame(() => {
+    if (desc.scrollHeight > desc.clientHeight) {
+      el.classList.add("truncated");
+      const toggle=document.createElement('button');
+      toggle.className="see-toggle";
+      toggle.textContent="See More";
+      toggle.onclick=()=>{
+        el.classList.toggle("expanded");
+        toggle.textContent = el.classList.contains("expanded") ? "See Less" : "See More";
+      };
+      el.appendChild(toggle);
+    }
+  });
 
   if(item.image_url){
     const wrapper=document.createElement('div');wrapper.className='image-wrapper';

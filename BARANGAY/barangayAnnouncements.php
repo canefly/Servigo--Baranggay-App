@@ -1,5 +1,5 @@
-<?php include 'INCLUDES/barangaySidebar.php'; ?> 
-<?php include 'INCLUDES/barangayTopbar.php'; ?>
+<?php include 'Components/barangaySidebar.php'; ?> 
+<?php include 'Components/barangayTopbar.php'; ?>
 
 <!DOCTYPE html>
 <html lang="en">
