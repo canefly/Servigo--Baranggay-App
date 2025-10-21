@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['sg_email'] = $admin['email'];
         $_SESSION['role']     = "admin";
 
-        header("Location: Barangay/dashboard.php");
+        header("Location: Barangay/requests.php");
         exit();
       } else {
         $error = "❌ Incorrect password.";
