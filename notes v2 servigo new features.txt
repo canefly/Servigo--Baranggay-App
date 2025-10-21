@@ -1,0 +1,188 @@
+
+SERVIGO – NEWLY ADDED FEATURE EXTENSIONS (EXPANSION MODULES)
+EXPLANATION OF ADDED FEATURES (BARANGAY SIDE)
+
+====================
+
+1. 📮 SUGGESTION BOX / RESIDENT FEEDBACK
+   ====================
+   Description:
+   A simple feedback system for residents. After using a feature (e.g., submitting a request), users are asked if their experience was helpful using a thumbs up or thumbs down button. If thumbs down is selected, they are optionally asked to explain why.
+
+Purpose:
+
+* Collect resident satisfaction data
+* Give barangay staff an overview of what needs improvement
+* Does NOT function as a complaint box or problem report
+
+Benefits:
+
+* Lightweight and non-intrusive
+* Gives the feeling that the system listens
+* Can be used for future UI or service improvements
+
+====================
+2. 🔔 PUSH NOTIFICATIONS
+========================
+
+Description:
+Browser-based push alerts sent to users when something important happens. Examples: new announcement posted, document approved, event reminder.
+
+Purpose:
+
+* Keep users updated in real-time without needing to open the app
+* Encourages engagement and fast response
+
+Benefits:
+
+* Works on desktop and most mobile browsers
+* Can be implemented via Firebase or serviceWorker
+* High perceived value in presentation
+
+====================
+3. 🌍 MULTI-BARANGAY SUPPORT
+============================
+
+Description:
+System supports multiple barangays. Each barangay has its own admin/staff and resident users. A super admin can create new barangays and assign staff accounts.
+
+Purpose:
+
+* Expand the app beyond one barangay
+* Future-proofing for LGU-level implementation
+
+Benefits:
+
+* Scalable by design
+* Allows easier demoing with fake barangays in defense
+* Easy to control data separation
+
+====================
+4. 🧭 FACILITY DIRECTORY
+========================
+
+Description:
+Lists barangay facilities such as the barangay hall, health center, covered court, etc. Shown similarly to services, with location pins, open/closed status, and events happening.
+
+Purpose:
+
+* Inform residents what facilities are available and when
+* Avoid unnecessary visits if closed or under maintenance
+
+Benefits:
+
+* Reuses existing service UI with slight tweaks
+* Adds depth to the app without heavy logic
+* Works well with the Events Calendar feature
+
+====================
+5. 📅 EVENTS CALENDAR
+=====================
+
+Description:
+Shows upcoming barangay events in a timeline or calendar view. Examples: feeding program, cleanup drive, sports tournament. Optional “Mark as Interested” feature for users.
+
+Purpose:
+
+* Central hub for all scheduled activities
+* Makes barangay feel active and transparent
+
+Benefits:
+
+* Can be linked to announcements
+* Adds highly visual and engaging feature
+* Professors love seeing scheduling tools
+
+
+
+Comparison from our current features to latest features:
+SERVIGO SYSTEM FEATURE OVERVIEW
+(Default Features + Extensions)
+
+====================
+
+1. RESIDENT VERIFICATION SYSTEM
+   ====================
+
+* Level 0: Guest access
+* Level 1: Partially Verified (basic info only)
+* Level 2: Fully Verified (OCR ID scan + barangay approval)
+
+[EXTENSION LINKED TO VERIFICATION]
+→ Verified residents can access all services
+→ Admin dashboard shows verification queue
+→ Multi-barangay role system adds super admin controls for scaling
+→ Verified residents can also register as service providers
+
+====================
+2. DOCUMENT REQUEST SYSTEM
+==========================
+
+* Residents can request barangay documents (e.g., clearance, permits)
+* Requests are visible to admin for approval/rejection
+* Request history view for users
+
+[EXTENSION LINKED TO DOCUMENT SYSTEM]
+→ Push Notifications alert residents when status changes
+→ Feedback popup (thumbs up/down) after document approval or rejection
+
+====================
+3. ANNOUNCEMENTS & ADVISORIES
+=============================
+
+* Posted by barangay staff
+* Visible to all residents (Level 1 or higher)
+* Categories: General, Emergency, Event
+
+[EXTENSION LINKED TO ANNOUNCEMENTS]
+→ Push Notifications alert residents when new announcement is posted
+→ Linked with Events Calendar module
+→ "Mark as Interested" for event-type announcements
+
+====================
+4. SERVICE DIRECTORY
+====================
+
+* Two types:
+  A. Home-to-Home (e.g., tutor, electrician)
+  B. Fixed Location (e.g., sari-sari store, clinic)
+* Split by: Licensed Business vs Barangay-Approved Informal Service
+* Verified and approved by barangay staff
+
+[EXTENSION LINKED TO SERVICE DIRECTORY]
+→ Facility Directory reuses this UI structure
+→ Facilities shown with status (open, closed, event ongoing)
+→ Residents can use map pins and tags (e.g., “available for home service”)
+
+====================
+5. ADMIN DASHBOARD
+==================
+
+* Manages document requests
+* Verifies residents
+* Approves/denies service listings
+* Posts announcements
+* Views resident activity
+
+[EXTENSION LINKED TO DASHBOARD]
+→ Dashboard now supports multi-barangay control (super admin)
+→ Dashboard includes resident feedback logs from Suggestion Box
+→ Admin can view engagement metrics (e.g., interest in events)
+
+====================
+6. SYSTEM-WIDE ENHANCEMENTS (EXPANDED MODULES)
+==============================================
+
+* Suggestion Box: Simple thumbs up/down, optional feedback, per feature or action
+* Push Notifications: Real-time browser alerts (announcements, request updates, service changes)
+* Events Calendar: Organized timeline of barangay activities, optional attendance tag
+* Facility Directory: Static facilities listed like services, with status info and activity tags
+* Multi-Barangay Support: Enables app to serve multiple barangays with isolated data and roles
+
+====================
+IN SUMMARY
+==========
+
+All new features are designed as **extensions** of the original modules, not separate systems.
+This avoids system bloat while presenting a more powerful platform for both residents and barangay staff.
+New features enhance trust, accessibility, and community involvement — without increasing dev risk or operational confusion.
