@@ -80,7 +80,7 @@
       </div>
       <nav>
         <a href="#features" class="ghost">Features</a>
-        <a href="loginPage.php" class="btn">Login</a>
+        <a href="loginPageDEBUG.php" class="btn">Login</a>
       </nav>
     </div>
   </div>
