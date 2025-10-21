@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once(__DIR__ . "/../Database/connection.php");
+require_once(__DIR__ . "/Database/connection.php");
 
 $error = "";
 
@@ -11,10 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if ($email === '' || $pass === '') {
     $error = "❌ Please enter both email and password.";
   } else {
-    /* ────────────────────────────────
-       1️⃣ Check Barangay Admin first
-    ──────────────────────────────── */
-    $stmt = $conn->prepare("SELECT admin_id AS id, full_name, barangay_name, email, password FROM barangay_admin WHERE email = ?");
+
+    /* 🟩 Check Barangay Admin first */
+    $stmt = $conn->prepare("SELECT id, barangay_name, email, password FROM barangay_admins WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -22,20 +21,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($admin = $result->fetch_assoc()) {
       if ($admin['password'] === $pass) {
         $_SESSION['sg_id']    = $admin['id'];
-        $_SESSION['sg_name']  = $admin['full_name'];
+        $_SESSION['sg_name']  = 'Admin';
         $_SESSION['sg_brgy']  = $admin['barangay_name'];
         $_SESSION['sg_email'] = $admin['email'];
         $_SESSION['role']     = "admin";
 
-        header("Location: ../Admin/barangayDashboard.php");
+        header("Location: Barangay/dashboard.php");
         exit();
       } else {
         $error = "❌ Incorrect password.";
       }
     } else {
-      /* ────────────────────────────────
-         2️⃣ Check Residents table
-      ──────────────────────────────── */
+      /* 🟦 Check Residents */
       $stmt2 = $conn->prepare("SELECT id, first_name, barangay, email, password FROM residents WHERE email = ?");
       $stmt2->bind_param("s", $email);
       $stmt2->execute();
@@ -49,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           $_SESSION['sg_email'] = $user['email'];
           $_SESSION['role']     = "resident";
 
-          header("Location: ../Resident/residentsPage.php");
+          header("Location: Resident/residentsPage.php");
           exit();
         } else {
           $error = "❌ Incorrect password.";
@@ -64,7 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -153,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="POST" novalidate>
       <div>
         <label for="email">Email</label>
-        <input id="email" name="email" type="email" class="input" placeholder="e.g., juan@demo.gov.ph" required />
+        <input id="email" name="email" type="text" class="input" placeholder="e.g., admin1 or resident1" required />
       </div>
 
       <div>
