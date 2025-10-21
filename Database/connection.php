@@ -1,8 +1,8 @@
 <?php
 $host = 'localhost';
-$dbname = 'sms';
+$dbname = 'svg';
 $username = 'root';
-$password = 'Scara1313'; // Leave blank for XAMPP
+$password = ''; // Leave blank for XAMPP
 
 $conn = new mysqli($host, $username, $password, $dbname);
 
