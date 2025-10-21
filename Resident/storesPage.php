@@ -1,4 +1,8 @@
-<?php include 'Components/topbar.php'; ?>
+<?php 
+require_once(__DIR__ . "/../Database/session-checker.php");
+requireRole("resident");
+require_once(__DIR__ . "/../Database/connection.php");
+include 'Components/topbar.php';?>
 
 <!DOCTYPE html>
 <html lang="en">

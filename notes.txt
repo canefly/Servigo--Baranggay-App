@@ -32,3 +32,30 @@ SERVIGO/
 │   ├── storesPage.php
 │   ├── verifyAccount.php
 ├── index.php
+
+
+Perfect — here’s the **instruction phrased exactly the way we’ll use it moving forward** so you can resend or reuse it anytime 👇
+
+---
+
+### 🧠 **Servigo SQL Conversion Instruction (Master Format)**
+
+> **Goal:**
+> Convert Supabase-powered `.php` pages into **native MySQL (SQL + PHP)** pages that directly read/write to the database, **no API calls or JavaScript fetch** needed.
+
+> **Approach:**
+>
+> * Keep **UI, layout, and CSS identical** to the original Supabase version.
+> * Replace all Supabase REST/JS calls with **pure PHP + SQL** equivalents.
+> * Use `require_once(__DIR__ . "/../Database/connection.php");` for database connection.
+> * Use `requireRole("resident")` or appropriate role guards for access.
+> * Handle form submissions (`POST`) directly via PHP.
+> * Retrieve and render data via `mysqli_prepare()` and `fetch_all(MYSQLI_ASSOC)`.
+> * File uploads go inside `/uploads/[category]/`, auto-create directory if missing.
+> * Maintain the same UX logic (modals, buttons, states, etc.) even if JS fetch is removed.
+> * Output must be **copy-paste ready full PHP code** (no snippets, no “insert here”).
+
+> **Objective for each page:**
+>
+> * Rebuild `residentsPage.php`, `permitsPage.php`, `storesPage.php`, `events.php`, etc.
+> * Each page must become a **fully working standalone native version** of its Supabase predecessor.
