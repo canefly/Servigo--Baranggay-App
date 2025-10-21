@@ -11,26 +11,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if ($email === '' || $pass === '') {
     $error = "❌ Please enter both email and password.";
   } else {
-    $stmt = $conn->prepare("SELECT id, first_name, barangay, email, password FROM residents WHERE email = ?");
+    /* ────────────────────────────────
+       1️⃣ Check Barangay Admin first
+    ──────────────────────────────── */
+    $stmt = $conn->prepare("SELECT admin_id AS id, full_name, barangay_name, email, password FROM barangay_admin WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if ($user = $result->fetch_assoc()) {
-      if ($user['password'] === $pass) {
-        $_SESSION['sg_id']     = $user['id'];
-        $_SESSION['sg_name']   = $user['first_name'];
-        $_SESSION['sg_brgy']   = $user['barangay'];
-        $_SESSION['sg_email']  = $user['email'];
-        $_SESSION['role']      = "resident";
+    if ($admin = $result->fetch_assoc()) {
+      if ($admin['password'] === $pass) {
+        $_SESSION['sg_id']    = $admin['id'];
+        $_SESSION['sg_name']  = $admin['full_name'];
+        $_SESSION['sg_brgy']  = $admin['barangay_name'];
+        $_SESSION['sg_email'] = $admin['email'];
+        $_SESSION['role']     = "admin";
 
-        header("Location: residentsPage.php");
+        header("Location: ../Admin/barangayDashboard.php");
         exit();
       } else {
         $error = "❌ Incorrect password.";
       }
     } else {
-      $error = "❌ No account found with that email.";
+      /* ────────────────────────────────
+         2️⃣ Check Residents table
+      ──────────────────────────────── */
+      $stmt2 = $conn->prepare("SELECT id, first_name, barangay, email, password FROM residents WHERE email = ?");
+      $stmt2->bind_param("s", $email);
+      $stmt2->execute();
+      $res2 = $stmt2->get_result();
+
+      if ($user = $res2->fetch_assoc()) {
+        if ($user['password'] === $pass) {
+          $_SESSION['sg_id']    = $user['id'];
+          $_SESSION['sg_name']  = $user['first_name'];
+          $_SESSION['sg_brgy']  = $user['barangay'];
+          $_SESSION['sg_email'] = $user['email'];
+          $_SESSION['role']     = "resident";
+
+          header("Location: ../Resident/residentsPage.php");
+          exit();
+        } else {
+          $error = "❌ Incorrect password.";
+        }
+      } else {
+        $error = "❌ No account found with that email.";
+      }
+      $stmt2->close();
     }
 
     $stmt->close();
@@ -57,14 +84,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       background:var(--bg); color:var(--text);
       display:grid; place-items:center; padding:20px;
     }
-
     .auth-card{
       width:min(420px,100%); background:var(--card);
       border:1px solid var(--border); border-radius:var(--radius);
       box-shadow:var(--shadow); padding:32px 26px;
       display:flex; flex-direction:column; gap:18px;
     }
-
     .brand{display:flex; align-items:center; gap:10px}
     .logo{
       width:40px; height:40px; border-radius:10px;
@@ -72,10 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       display:grid; place-items:center; font-weight:800; color:#fff;
     }
     .brand h1{margin:0; font-size:22px; color:var(--brand)}
-
     .muted{color:var(--muted)}
-    .small{font-size:13px; text-align: center;}
-
+    .small{font-size:13px; text-align:center;}
     form{display:flex; flex-direction:column; gap:14px}
     label{font-weight:600; font-size:.95rem}
     .input{
@@ -84,10 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       background:#fff; color:var(--text);
     }
     .input:focus{outline:2px solid rgba(30,64,175,.35); outline-offset:2px}
-
-    .input-group{
-      position:relative; display:flex; align-items:center;
-    }
+    .input-group{position:relative; display:flex; align-items:center;}
     .input-group input{flex:1; padding-right:70px}
     .togglePw{
       position:absolute; right:8px; top:50%; transform:translateY(-50%);
@@ -95,30 +115,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:600;
     }
     .togglePw:hover{background:#e5e7eb}
-
-    .row{display:flex; justify-content:space-between; align-items:center}
-    .check{display:flex; align-items:center; gap:6px; cursor:pointer}
-    .check input{accent-color:var(--brand)}
-
     .btn{
       all:unset; cursor:pointer; text-align:center;
       padding:12px 14px; border-radius:12px; font-weight:700;
       background:linear-gradient(135deg,var(--brand),var(--accent)); color:#fff;
     }
     .btn:hover{opacity:.95}
-
     .error{
       margin:0; padding:10px 12px; font-size:.9rem;
       border:1px solid rgba(239,68,68,.35); background:rgba(239,68,68,.1);
       color:#b91c1c; border-radius:12px;
     }
-
     .register-hint{
       margin-top:6px; text-align:center; font-size:.95rem; color:var(--muted);
     }
     .register-hint a{color:var(--brand); font-weight:600; text-decoration:none}
     .register-hint a:hover{text-decoration:underline}
-
     @media(max-width:420px){
       .auth-card{padding:22px 18px}
       .brand h1{font-size:20px}
@@ -166,7 +178,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <script>
     const pw = document.getElementById('password');
     const tog = document.getElementById('togglePw');
-
     tog.addEventListener('click', () => {
       const isPw = pw.type === 'password';
       pw.type = isPw ? 'text' : 'password';
