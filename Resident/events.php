@@ -1,225 +1,432 @@
-<?php include 'Components/topbar.php'; ?>
+<?php
+require_once(__DIR__ . "/../Database/session-checker.php");
+requireRole("resident");
+require_once(__DIR__ . "/../Database/connection.php");
+include 'Components/topbar.php';
 
+$resident_id = $_SESSION['sg_id'] ?? null;
+$barangay    = $_SESSION['sg_brgy'] ?? 'Unknown Barangay';
+
+/* ---------- Filters ---------- */
+$cat  = $_GET['cat'] ?? 'All';
+$from = $_GET['from'] ?? '';
+$to   = $_GET['to'] ?? '';
+
+/* ---------- Toggle interest ---------- */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_interest'], $_POST['event_id']) && $resident_id) {
+    $event_id = (int)$_POST['event_id'];
+
+    $chk = $conn->prepare("SELECT id FROM event_interest WHERE event_id=? AND resident_id=?");
+    $chk->bind_param("ii", $event_id, $resident_id);
+    $chk->execute();
+    $have = $chk->get_result();
+
+    if ($have && $have->num_rows > 0) {
+        $row = $have->fetch_assoc();
+        $del = $conn->prepare("DELETE FROM event_interest WHERE id=?");
+        $del->bind_param("i", $row['id']);
+        $del->execute();
+        $del->close();
+    } else {
+        $ins = $conn->prepare("INSERT INTO event_interest (event_id,resident_id) VALUES (?,?)");
+        $ins->bind_param("ii", $event_id, $resident_id);
+        $ins->execute();
+        $ins->close();
+    }
+    $chk->close();
+
+    header("Location: events.php?cat=" . urlencode($cat) . "&from=" . urlencode($from) . "&to=" . urlencode($to));
+    exit();
+}
+
+/* ---------- Fetch events ---------- */
+$sql = "SELECT id, title, description, category, venue, start_date, end_date, visibility, created_at
+        FROM barangay_events
+        WHERE barangay_name = ?";
+$params = [$barangay];
+$types = "s";
+
+if ($cat !== '' && $cat !== 'All') { $sql .= " AND category = ?"; $params[] = $cat; $types .= "s"; }
+if ($from !== '') { $sql .= " AND DATE(start_date) >= ?"; $params[] = $from; $types .= "s"; }
+if ($to !== '') { $sql .= " AND DATE(start_date) <= ?"; $params[] = $to; $types .= "s"; }
+$sql .= " ORDER BY start_date DESC";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param($types, ...$params);
+$stmt->execute();
+$res = $stmt->get_result();
+$events = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
+$stmt->close();
+
+/* ---------- Categories for filters ---------- */
+$cq = $conn->prepare("SELECT DISTINCT category FROM barangay_events WHERE barangay_name=? ORDER BY category");
+$cq->bind_param("s", $barangay);
+$cq->execute();
+$cres = $cq->get_result();
+$categories = $cres ? array_column($cres->fetch_all(MYSQLI_ASSOC), 'category') : [];
+$cq->close();
+
+/* ---------- Interest counters ---------- */
+$ids = array_column($events, 'id');
+$interestCount = []; $mine = [];
+if (!empty($ids)) {
+    $in = implode(",", array_fill(0, count($ids), "?"));
+    $t = str_repeat("i", count($ids));
+
+    $q1 = $conn->prepare("SELECT event_id, COUNT(*) c FROM event_interest WHERE event_id IN ($in) GROUP BY event_id");
+    $q1->bind_param($t, ...$ids);
+    $q1->execute();
+    $r1 = $q1->get_result();
+    foreach ($r1->fetch_all(MYSQLI_ASSOC) as $row) {
+        $interestCount[(int)$row['event_id']] = (int)$row['c'];
+    }
+    $q1->close();
+
+    if ($resident_id) {
+        $q2 = $conn->prepare("SELECT event_id FROM event_interest WHERE resident_id=? AND event_id IN ($in)");
+        $typesMine = "i" . $t;
+        $paramsMine = array_merge([$resident_id], $ids);
+        $q2->bind_param($typesMine, ...$paramsMine);
+        $q2->execute();
+        $r2 = $q2->get_result();
+        foreach ($r2->fetch_all(MYSQLI_ASSOC) as $row) {
+            $mine[(int)$row['event_id']] = true;
+        }
+        $q2->close();
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Servigo · Barangay Events</title>
-<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Servigo · Events</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Parkinsans:wght@300..800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#f5f7fa;
-  --card:#ffffff;
-  --text:#222;
-  --muted:#6b7280;
-  --brand:#1e40af;
-  --accent:#16a34a;
-  --border:#e5e7eb;
-  --shadow:0 2px 8px rgba(0,0,0,.08);
-  --radius:16px;
-  --gap:14px;
-  --pad:14px;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.5;
-}
-.container{max-width:1100px;margin:0 auto;padding:16px}
-
-/* Nav tabs */
-.navtabs{
-  display:flex; gap:8px; justify-content:center;
-  background:#f9fafb; padding:10px; border-bottom:1px solid var(--border);
-  flex-wrap:wrap;
-}
-.tabbtn{
-  all:unset; cursor:pointer; font-weight:600;
-  padding:8px 14px; border-radius:10px;
-  color:var(--text); border:1px solid var(--border); background:#f3f4f6;
-}
-.tabbtn.active{
-  background:linear-gradient(135deg,var(--brand),var(--accent));
-  color:#fff; font-weight:700;
+  --brand-green: #047857;
+  --accent-blue: #3b82f6;
+  --bg: #f3f4f6;
+  --white: #ffffff;
+  --text: #1e293b;
+  --muted: #6b7280;
+  --radius: 14px;
+  --shadow: 0 2px 10px rgba(0,0,0,.08);
+  --transition: 0.3s ease;
+  --maxw: 1600px;
 }
 
-/* Event cards */
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:var(--pad);
-  box-shadow:var(--shadow);
-  margin-bottom:20px;
+/* Base */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Parkinsans","Outfit","Roboto",system-ui,sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-h2{margin-top:0;color:var(--brand)}
-.muted{color:var(--muted)}
-.divider{height:1px;background:var(--border);margin:12px 0}
-.event-grid{display:grid;gap:16px}
-.event{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:12px;
-  box-shadow:var(--shadow);
-  padding:14px 16px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+
+/* Layout */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 3rem;
 }
-.event h3{margin:0;font-size:17px;color:var(--brand)}
-.event p{margin:0;font-size:14px;color:var(--text)}
-.event .meta{font-size:13px;color:var(--muted)}
-.event .btn{
-  all:unset;cursor:pointer;text-align:center;
-  background:var(--accent);color:#fff;
-  padding:8px 12px;border-radius:8px;
-  font-size:14px;margin-top:6px;
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin: .5rem 0 1rem 0;
 }
-.event .btn:hover{background:#15803d}
-.counter{font-size:13px;color:var(--muted);margin-left:6px}
-.empty{
-  padding:16px;text-align:center;
-  color:var(--muted);
-  border:1px dashed var(--border);
-  border-radius:12px;
+.page-header i { color: var(--brand-green); font-size: 1.35rem; }
+.page-header h2 {
+  font-family: "Outfit", sans-serif;
+  color: var(--brand-green);
+  font-size: 1.6rem;
+  font-weight: 700;
 }
-footer{
-  color:var(--muted);
-  text-align:center;
-  padding:20px 12px;
-  font-size:14px;
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: .75rem;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 0.75rem;
+  scroll-behavior: smooth;
+  white-space: nowrap;
+}
+.tabs::-webkit-scrollbar {
+  height: 6px;
+}
+.tabs::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 10px;
+}
+.tabs::-webkit-scrollbar-thumb {
+  background: var(--accent-blue);
+  border-radius: 10px;
+}
+.tabs::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+}
+
+.filter-tab {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--muted);
+  padding: .55rem 1.1rem;
+  cursor: pointer;
+  border-radius: 999px;
+  flex-shrink: 0;
+  transition: background 0.3s, color 0.3s;
+}
+.filter-tab:hover { background: #e9eefb; }
+.filter-tab.active {
+  color: #fff;
+  background: var(--brand-green);
+}
+
+/* Events Grid */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+  transition: opacity .28s ease, transform .28s ease;
+}
+.events-grid.fading {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.event-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  transition: transform .22s var(--transition), box-shadow .22s var(--transition);
+}
+.event-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.08);
+}
+
+.event-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.event-title { font-size: 1.1rem; font-weight: 700; }
+.event-status {
+  font-size: .8rem;
+  color: #fff;
+  background: var(--accent-blue);
+  padding: .28rem .6rem;
+  border-radius: 7px;
+  font-weight: 600;
+}
+.event-status.upcoming { background: var(--brand-green); }
+.event-status.past { background: #9ca3af; }
+
+.event-meta { font-size: .95rem; color: var(--muted); display: grid; gap: .15rem; }
+.event-meta i { margin-right: .35rem; color: var(--accent-blue); }
+
+.event-description { font-size: .95rem; line-height: 1.5; color: var(--text); }
+
+.event-actions {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.interested-btn {
+  background: none;
+  border: 1.6px solid var(--accent-blue);
+  color: var(--accent-blue);
+  border-radius: 12px;
+  padding: .5rem .95rem;
+  font-size: .95rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.interested-btn i { font-size: 1.05rem; }
+.interested-btn:hover { background: var(--accent-blue); color: #fff; }
+.interested-btn.active { background: var(--brand-green); border-color: var(--brand-green); color: #fff; }
+
+.interest-count { font-size: .95rem; color: var(--muted); }
+
+.empty-state {
+  text-align: center;
+  color: var(--muted);
+  margin-top: 1.4rem;
+  font-size: .98rem;
+}
+
+@media (max-width: 640px) {
+  .page-header h2 { font-size: 1.35rem; }
+  .events-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
+<main>
+  <div class="page-header">
+    <i class="bi bi-calendar-event"></i>
+    <h2>Events</h2>
+  </div>
 
+  <div class="tabs" id="tabs">
+    <button class="filter-tab active" data-filter="all">All</button>
+    <button class="filter-tab" data-filter="upcoming">Upcoming</button>
+    <button class="filter-tab" data-filter="ongoing">Ongoing</button>
+    <button class="filter-tab" data-filter="past">Past</button>
+  </div>
 
-<!-- Navtabs -->
-<nav class="navtabs">
-  <a href="residentsPage.php" class="tabbtn">News</a>
-  <a href="permitsPage.php" class="tabbtn">Permits</a>
-  <a href="storesPage.php" class="tabbtn">Stores</a>
-  <a href="events.php" class="tabbtn active">Events</a>
-</nav>
-
-<main class="container" id="app" tabindex="-1">
-  <section class="card">
-    <h2>📅 Barangay Events</h2>
-    <p class="muted">Community activities and programs for <strong id="brgyName"></strong>.</p>
-    <div class="divider"></div>
-    <section id="eventGrid" class="event-grid" aria-live="polite"></section>
-    <div id="emptyState" class="empty" hidden>No upcoming events found.</div>
-  </section>
+  <div class="events-grid" id="eventGrid">
+  <?php if (empty($events)): ?>
+    <div class="empty-state"><i class="bi bi-emoji-frown"></i> No events found for this category.</div>
+  <?php else: ?>
+    <?php foreach ($events as $e): 
+      $start = new DateTime($e['start_date']);
+      $end = new DateTime($e['end_date'] ?? $e['start_date']);
+      $count = $interestCount[$e['id']] ?? 0;
+      $active = isset($mine[$e['id']]);
+    ?>
+    <article class="event-card"
+      data-status=""
+      data-start="<?= htmlspecialchars($e['start_date']) ?>"
+      data-end="<?= htmlspecialchars($e['end_date'] ?? $e['start_date']) ?>">
+      <div class="event-header">
+        <span class="event-title"><?= htmlspecialchars($e['title']) ?></span>
+        <span class="event-status">Upcoming</span>
+      </div>
+      <div class="event-meta">
+        <div><i class="bi bi-calendar-check"></i> <?= $start->format('F j, Y g:i A') ?></div>
+        <div><i class="bi bi-geo-alt"></i> <?= htmlspecialchars($e['venue'] ?? 'TBA') ?></div>
+      </div>
+      <p class="event-description"><?= nl2br(htmlspecialchars($e['description'] ?? '')) ?></p>
+      <div class="event-actions">
+        <form method="post" style="margin:0;">
+          <input type="hidden" name="event_id" value="<?= $e['id'] ?>">
+          <button class="interested-btn <?= $active ? 'active' : '' ?>" name="toggle_interest">
+            <i class="bi <?= $active ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up' ?>"></i> Interested
+          </button>
+        </form>
+        <span class="interest-count"><?= $count ?> interested</span>
+      </div>
+    </article>
+    <?php endforeach; ?>
+  <?php endif; ?>
+  </div>
 </main>
-
-<footer>
-  <small>© 2025 Servigo (Prototype)</small>
-</footer>
-
 <script>
-const SUPABASE_URL = "https://hlyjmgwpufqtghwnpgfe.supabase.co/";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhseWptZ3dwdWZxdGdod25wZ2ZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NzYxMjEsImV4cCI6MjA3MzM1MjEyMX0.G0ocq2K1DAHqM5zn3ZfyflUd5gH2QS27_TY548ZgEOw";
+/* ===========================================================
+   INTERACTIVE UI (Frontend)
+=========================================================== */
+const tabs = document.querySelectorAll('.filter-tab');
+const grid = document.getElementById('eventGrid');
+const cards = Array.from(document.querySelectorAll('.event-card'));
+const empty = document.getElementById('emptyState');
 
-const RESIDENT_ID = localStorage.getItem("sg_id");
-const BARANGAY = localStorage.getItem("sg_brgy");
-const RESIDENT_NAME = localStorage.getItem("sg_name") || "Resident";
-document.getElementById("brgyName").textContent = BARANGAY || "Barangay";
+/* 1) Auto status detection */
+(function deriveStatus() {
+  const now = new Date();
+  cards.forEach(card => {
+    const start = new Date(card.dataset.start);
+    const end = new Date(card.dataset.end || card.dataset.start);
+    let status = 'upcoming';
+    if (now >= start && now <= end) status = 'ongoing';
+    if (now > end) status = 'past';
+    card.dataset.status = status;
 
-/* Load all barangay events */
-async function loadEvents() {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/barangay_events?barangay_name=eq.${BARANGAY}&order=start_date.asc`, {
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`
+    const badge = card.querySelector('.event-status');
+    if (badge) {
+      badge.classList.remove('upcoming','past');
+      if (status === 'upcoming') { badge.textContent = 'Upcoming'; badge.classList.add('upcoming'); }
+      else if (status === 'past') { badge.textContent = 'Past'; badge.classList.add('past'); }
+      else { badge.textContent = 'Ongoing'; }
     }
   });
-  const events = await res.json();
-  displayEvents(events);
-}
+})();
 
-/* Display events list */
-function displayEvents(events) {
-  const grid = document.getElementById("eventGrid");
-  const empty = document.getElementById("emptyState");
+/* 2) Choose initial tab */
+(function setInitialTab() {
+  let hasOngoing = cards.some(c => c.dataset.status === 'ongoing');
+  let hasUpcoming = cards.some(c => c.dataset.status === 'upcoming');
+  const target = hasOngoing ? 'ongoing' : (hasUpcoming ? 'upcoming' : 'all');
+  const btn = document.querySelector(`.filter-tab[data-filter="${target}"]`) || document.querySelector('.filter-tab[data-filter="all"]');
+  tabs.forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter(target, false);
+  window.addEventListener('load', () => centerTab(btn));
+})();
 
-  if (events.length === 0) {
-    grid.innerHTML = "";
-    empty.hidden = false;
-    return;
-  }
-  empty.hidden = true;
-
-  grid.innerHTML = events.map(event => `
-    <article class="event">
-      <h3>${event.title}</h3>
-      <p>${event.description || ""}</p>
-      <div class="meta">
-        📍 <strong>${event.venue || "TBA"}</strong><br>
-        🕒 ${new Date(event.start_date).toLocaleString()}${event.end_date ? ` - ${new Date(event.end_date).toLocaleString()}` : ""}
-        <br>🏷️ ${event.category}
-      </div>
-      <button class="btn" onclick="markInterested(${event.id})">⭐ Mark as Interested</button>
-    </article>
-  `).join("");
-}
-
-/* Mark as Interested + Notify Admin */
-async function markInterested(eventId) {
-  if(!RESIDENT_ID){ alert("Please log in first."); return; }
-
-  // 1️⃣ Save interest record
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/event_interest`, {
-    method: "POST",
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      event_id: eventId,
-      resident_id: RESIDENT_ID
-    })
+/* 3) Click handler + smooth scroll centering */
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    if (tab.classList.contains('active')) return;
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    applyFilter(tab.dataset.filter, true);
+    centerTab(tab);
   });
+});
 
-  if (!res.ok) {
-    alert("⚠️ Failed to mark interest. Please try again.");
-    return;
-  }
-
-  alert("✅ You are marked as interested in this event!");
-
-  // 2️⃣ Send notification to barangay admin
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        barangay_name: BARANGAY,
-        recipient_type: "admin",
-        type: "event_interest",
-        title: "Resident Interested in Event",
-        message: `${RESIDENT_NAME} marked interest in "${eventId}" event.`,
-        source_table: "barangay_events",
-        source_id: eventId
-      })
-    });
-    console.log("✅ Notification sent to admin.");
-  } catch (err) {
-    console.error("⚠️ Failed to send notification:", err);
-  }
+/* Helper: Center the active tab */
+function centerTab(tab) {
+  const tabsContainer = document.getElementById('tabs');
+  const tabRect = tab.getBoundingClientRect();
+  const containerRect = tabsContainer.getBoundingClientRect();
+  const offset = (tabRect.left + tabRect.width/2) - (containerRect.left + containerRect.width/2);
+  tabsContainer.scrollBy({ left: offset * 0.9, behavior: 'smooth' });
 }
 
-loadEvents();
+/* 4) Filter logic with fade animation */
+function applyFilter(filter, animated) {
+  if (animated) grid.classList.add('fading');
+  setTimeout(() => {
+    let visible = 0;
+    cards.forEach(card => {
+      const show = filter === 'all' || card.dataset.status === filter;
+      card.style.display = show ? 'flex' : 'none';
+      if (show) visible++;
+    });
+    empty.hidden = visible > 0;
+    if (animated) requestAnimationFrame(() => grid.classList.remove('fading'));
+  }, animated ? 160 : 0);
+}
+
+/* 5) Interested toggle */
+document.querySelectorAll('.interested-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const countEl = btn.parentElement.querySelector('.interest-count');
+    let count = parseInt(countEl.textContent);
+    const ON = btn.classList.toggle('active');
+    btn.innerHTML = ON
+      ? '<i class="bi bi-hand-thumbs-up-fill"></i> Interested'
+      : '<i class="bi bi-hand-thumbs-up"></i> Interested';
+    countEl.textContent = `${ON ? count + 1 : count - 1} interested`;
+  });
+});
+
 </script>
 </body>
 </html>
