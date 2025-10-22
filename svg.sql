@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 21, 2025 at 01:59 PM
+-- Generation Time: Oct 21, 2025 at 09:38 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -37,6 +37,16 @@ CREATE TABLE `announcements` (
   `image_path` text DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `announcements`
+--
+
+INSERT INTO `announcements` (`id`, `barangay_name`, `title`, `description`, `category`, `image_url`, `image_path`, `created_at`) VALUES
+(1, 'San Isidro', 'ahahaha', 'hohohoho', 'Advisory', '/uploads/announcements/1761064466_Gy43PxnXEAMANtG.jpg', 'C:\\xampp\\htdocs\\servigo\\Barangay/../uploads/announcements/1761064466_Gy43PxnXEAMANtG.jpg', '2025-10-22 00:34:26'),
+(2, 'San Isidro', 'waiodhaoiwndawd', 'aegfefefefefe', 'Event', '/servigo/uploads/announcements/1761064780_GzasCYta4AE3oTm.jpg', 'C:\\xampp\\htdocs\\servigo\\Barangay/../uploads/announcements/1761064780_GzasCYta4AE3oTm.jpg', '2025-10-22 00:39:40'),
+(3, 'San Isidro', 'erwsgvesdrfcghbedr', 'rtgertetre', 'Event', '/servigo/uploads/announcements/1761070201_cat.jpg', 'C:\\xampp\\htdocs\\servigo\\Barangay/../uploads/announcements/1761070201_cat.jpg', '2025-10-22 02:10:01'),
+(4, 'Barangay Debugon', 'grefgedrghbedrthfedth', 'edrftged5yf55555f5f5f5f5f5ff', 'Advisory', '/servigo/uploads/announcements/1761072387_cat.jpg', 'C:\\xampp\\htdocs\\servigo\\Barangay/../uploads/announcements/1761072387_cat.jpg', '2025-10-22 02:46:27');
 
 -- --------------------------------------------------------
 
@@ -95,7 +105,7 @@ CREATE TABLE `barangay_clearance_requests` (
 --
 
 INSERT INTO `barangay_clearance_requests` (`id`, `resident_id`, `fullname`, `civil_status`, `date_of_birth`, `house_street`, `city`, `province`, `date_of_residency`, `years_residency`, `purpose`, `valid_id_url`, `email`, `phone`, `barangay_name`, `created_at`, `status`, `permit_type`) VALUES
-(1, 1, 'Jay aldrin Tayoyo', 'Married', '2025-10-03', 'erdtfvgbtdrfyh', 'Quezon City', 'Manila', '2025-10-01', 10, '6rt7u65t', 'uploads/valid_ids/1761043903_cat.jpg', 'resident1', '960235528', 'Barangay Debugon', '2025-10-21 18:51:43', 'Pending', 'Barangay Clearance');
+(1, 1, 'Jay aldrin Tayoyo', 'Married', '2025-10-03', 'erdtfvgbtdrfyh', 'Quezon City', 'Manila', '2025-10-01', 10, '6rt7u65t', 'uploads/valid_ids/1761043903_cat.jpg', 'resident1', '960235528', 'Barangay Debugon', '2025-10-21 18:51:43', 'Cancelled', 'Barangay Clearance');
 
 -- --------------------------------------------------------
 
@@ -551,7 +561,7 @@ ALTER TABLE `verification_rejects`
 -- AUTO_INCREMENT for table `announcements`
 --
 ALTER TABLE `announcements`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `barangay_admins`
