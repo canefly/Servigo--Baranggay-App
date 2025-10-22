@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.1deb3
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Oct 21, 2025 at 09:38 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost:3306
+-- Generation Time: Oct 22, 2025 at 08:51 PM
+-- Server version: 8.0.43-0ubuntu0.24.04.2
+-- PHP Version: 8.3.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -28,25 +28,25 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `announcements` (
-  `id` bigint(20) NOT NULL,
-  `barangay_name` text NOT NULL,
-  `title` text NOT NULL,
-  `description` text NOT NULL,
-  `category` varchar(100) NOT NULL DEFAULT 'Advisory',
-  `image_url` text DEFAULT NULL,
-  `image_path` text DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `id` bigint NOT NULL,
+  `barangay_name` text COLLATE utf8mb4_general_ci NOT NULL,
+  `title` text COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci NOT NULL,
+  `category` varchar(100) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Advisory',
+  `image_url` text COLLATE utf8mb4_general_ci,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `announcements`
 --
 
-INSERT INTO `announcements` (`id`, `barangay_name`, `title`, `description`, `category`, `image_url`, `image_path`, `created_at`) VALUES
-(1, 'San Isidro', 'ahahaha', 'hohohoho', 'Advisory', '/uploads/announcements/1761064466_Gy43PxnXEAMANtG.jpg', 'C:\\xampp\\htdocs\\servigo\\Barangay/../uploads/announcements/1761064466_Gy43PxnXEAMANtG.jpg', '2025-10-22 00:34:26'),
-(2, 'San Isidro', 'waiodhaoiwndawd', 'aegfefefefefe', 'Event', '/servigo/uploads/announcements/1761064780_GzasCYta4AE3oTm.jpg', 'C:\\xampp\\htdocs\\servigo\\Barangay/../uploads/announcements/1761064780_GzasCYta4AE3oTm.jpg', '2025-10-22 00:39:40'),
-(3, 'San Isidro', 'erwsgvesdrfcghbedr', 'rtgertetre', 'Event', '/servigo/uploads/announcements/1761070201_cat.jpg', 'C:\\xampp\\htdocs\\servigo\\Barangay/../uploads/announcements/1761070201_cat.jpg', '2025-10-22 02:10:01'),
-(4, 'Barangay Debugon', 'grefgedrghbedrthfedth', 'edrftged5yf55555f5f5f5f5f5ff', 'Advisory', '/servigo/uploads/announcements/1761072387_cat.jpg', 'C:\\xampp\\htdocs\\servigo\\Barangay/../uploads/announcements/1761072387_cat.jpg', '2025-10-22 02:46:27');
+INSERT INTO `announcements` (`id`, `barangay_name`, `title`, `description`, `category`, `image_url`, `created_at`) VALUES
+(1, 'San Isidro', 'ahahaha', 'hohohoho', 'Advisory', '/uploads/announcements/1761064466_Gy43PxnXEAMANtG.jpg', '2025-10-22 00:34:26'),
+(2, 'San Isidro', 'waiodhaoiwndawd', 'aegfefefefefe', 'Event', '/servigo/uploads/announcements/1761064780_GzasCYta4AE3oTm.jpg', '2025-10-22 00:39:40'),
+(3, 'San Isidro', 'erwsgvesdrfcghbedr', 'rtgertetre', 'Event', '/servigo/uploads/announcements/1761070201_cat.jpg', '2025-10-22 02:10:01'),
+(6, 'Barangay Debugon', 'TESTINGG ANNOUCNCEMENT', 'haha a cat.', 'Advisory', '//uploads/announcements/1761146901_cat.jpg', '2025-10-22 23:28:21'),
+(7, 'Barangay Debugon', 'hihihihi', 'hhohoho', 'Advisory', 'uploads/announcements/1761153156_GzxwRruaoAYMgvg.jpg', '2025-10-23 01:12:36');
 
 -- --------------------------------------------------------
 
@@ -55,15 +55,15 @@ INSERT INTO `announcements` (`id`, `barangay_name`, `title`, `description`, `cat
 --
 
 CREATE TABLE `barangay_admins` (
-  `id` bigint(20) NOT NULL,
-  `barangay_name` text NOT NULL,
-  `city` text NOT NULL,
-  `province` text NOT NULL,
-  `region` text NOT NULL,
-  `email` text NOT NULL,
-  `password` text NOT NULL,
-  `contact_no` text NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `id` bigint NOT NULL,
+  `barangay_name` text COLLATE utf8mb4_general_ci NOT NULL,
+  `city` text COLLATE utf8mb4_general_ci NOT NULL,
+  `province` text COLLATE utf8mb4_general_ci NOT NULL,
+  `region` text COLLATE utf8mb4_general_ci NOT NULL,
+  `email` text COLLATE utf8mb4_general_ci NOT NULL,
+  `password` text COLLATE utf8mb4_general_ci NOT NULL,
+  `contact_no` text COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -80,24 +80,24 @@ INSERT INTO `barangay_admins` (`id`, `barangay_name`, `city`, `province`, `regio
 --
 
 CREATE TABLE `barangay_clearance_requests` (
-  `id` bigint(20) NOT NULL,
-  `resident_id` bigint(20) DEFAULT NULL,
-  `fullname` text NOT NULL,
-  `civil_status` text NOT NULL,
+  `id` bigint NOT NULL,
+  `resident_id` bigint DEFAULT NULL,
+  `fullname` text COLLATE utf8mb4_general_ci NOT NULL,
+  `civil_status` text COLLATE utf8mb4_general_ci NOT NULL,
   `date_of_birth` date NOT NULL,
-  `house_street` text NOT NULL,
-  `city` text NOT NULL,
-  `province` text NOT NULL,
+  `house_street` text COLLATE utf8mb4_general_ci NOT NULL,
+  `city` text COLLATE utf8mb4_general_ci NOT NULL,
+  `province` text COLLATE utf8mb4_general_ci NOT NULL,
   `date_of_residency` date DEFAULT NULL,
-  `years_residency` int(11) DEFAULT NULL,
-  `purpose` text NOT NULL,
-  `valid_id_url` text DEFAULT NULL,
-  `email` text NOT NULL,
-  `phone` text DEFAULT NULL,
-  `barangay_name` text NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `status` varchar(50) NOT NULL DEFAULT 'Pending',
-  `permit_type` varchar(100) DEFAULT 'Barangay Clearance'
+  `years_residency` int DEFAULT NULL,
+  `purpose` text COLLATE utf8mb4_general_ci NOT NULL,
+  `valid_id_url` text COLLATE utf8mb4_general_ci,
+  `email` text COLLATE utf8mb4_general_ci NOT NULL,
+  `phone` text COLLATE utf8mb4_general_ci,
+  `barangay_name` text COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `status` varchar(50) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Pending',
+  `permit_type` varchar(100) COLLATE utf8mb4_general_ci DEFAULT 'Barangay Clearance'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -114,17 +114,17 @@ INSERT INTO `barangay_clearance_requests` (`id`, `resident_id`, `fullname`, `civ
 --
 
 CREATE TABLE `barangay_events` (
-  `id` bigint(20) NOT NULL,
-  `barangay_name` text NOT NULL,
-  `title` text NOT NULL,
-  `description` text DEFAULT NULL,
-  `category` varchar(100) DEFAULT 'General',
-  `venue` text DEFAULT NULL,
+  `id` bigint NOT NULL,
+  `barangay_name` text COLLATE utf8mb4_general_ci NOT NULL,
+  `title` text COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `category` varchar(100) COLLATE utf8mb4_general_ci DEFAULT 'General',
+  `venue` text COLLATE utf8mb4_general_ci,
   `start_date` datetime NOT NULL,
   `end_date` datetime DEFAULT NULL,
-  `visibility` varchar(50) DEFAULT 'public',
-  `linked_announcement_id` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `visibility` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'public',
+  `linked_announcement_id` bigint DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -134,24 +134,24 @@ CREATE TABLE `barangay_events` (
 --
 
 CREATE TABLE `business_permit_requests` (
-  `id` bigint(20) NOT NULL,
-  `resident_id` bigint(20) DEFAULT NULL,
-  `business_name` text DEFAULT NULL,
-  `owner_name` text DEFAULT NULL,
-  `email` text DEFAULT NULL,
-  `phone` text DEFAULT NULL,
-  `business_type` text DEFAULT NULL,
-  `dti_cert_url` text DEFAULT NULL,
-  `lease_contract_url` text DEFAULT NULL,
-  `purpose` text DEFAULT NULL,
-  `valid_id_url` text DEFAULT NULL,
-  `barangay_name` text DEFAULT NULL,
-  `status` varchar(50) DEFAULT 'Pending',
-  `created_at` datetime DEFAULT current_timestamp(),
-  `permit_type` varchar(100) DEFAULT 'Business Permit',
-  `house_street` text DEFAULT NULL,
-  `city` text DEFAULT NULL,
-  `province` text DEFAULT NULL
+  `id` bigint NOT NULL,
+  `resident_id` bigint DEFAULT NULL,
+  `business_name` text COLLATE utf8mb4_general_ci,
+  `owner_name` text COLLATE utf8mb4_general_ci,
+  `email` text COLLATE utf8mb4_general_ci,
+  `phone` text COLLATE utf8mb4_general_ci,
+  `business_type` text COLLATE utf8mb4_general_ci,
+  `dti_cert_url` text COLLATE utf8mb4_general_ci,
+  `lease_contract_url` text COLLATE utf8mb4_general_ci,
+  `purpose` text COLLATE utf8mb4_general_ci,
+  `valid_id_url` text COLLATE utf8mb4_general_ci,
+  `barangay_name` text COLLATE utf8mb4_general_ci,
+  `status` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'Pending',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `permit_type` varchar(100) COLLATE utf8mb4_general_ci DEFAULT 'Business Permit',
+  `house_street` text COLLATE utf8mb4_general_ci,
+  `city` text COLLATE utf8mb4_general_ci,
+  `province` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -161,10 +161,10 @@ CREATE TABLE `business_permit_requests` (
 --
 
 CREATE TABLE `event_interest` (
-  `id` bigint(20) NOT NULL,
-  `event_id` bigint(20) NOT NULL,
-  `resident_id` bigint(20) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `id` bigint NOT NULL,
+  `event_id` bigint NOT NULL,
+  `resident_id` bigint NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -174,22 +174,22 @@ CREATE TABLE `event_interest` (
 --
 
 CREATE TABLE `goodmoral_requests` (
-  `id` bigint(20) NOT NULL,
-  `resident_id` bigint(20) DEFAULT NULL,
-  `fullname` text NOT NULL,
-  `email` text DEFAULT NULL,
-  `phone` text DEFAULT NULL,
+  `id` bigint NOT NULL,
+  `resident_id` bigint DEFAULT NULL,
+  `fullname` text COLLATE utf8mb4_general_ci NOT NULL,
+  `email` text COLLATE utf8mb4_general_ci,
+  `phone` text COLLATE utf8mb4_general_ci,
   `date_of_birth` date DEFAULT NULL,
-  `barangay_clearance_url` text DEFAULT NULL,
-  `purpose` text DEFAULT NULL,
-  `valid_id_url` text DEFAULT NULL,
-  `barangay_name` text DEFAULT NULL,
-  `status` varchar(50) DEFAULT 'Pending',
-  `created_at` datetime DEFAULT current_timestamp(),
-  `permit_type` varchar(100) DEFAULT 'Certificate of Good Moral Character',
-  `house_street` text DEFAULT NULL,
-  `city` text DEFAULT NULL,
-  `province` text DEFAULT NULL
+  `barangay_clearance_url` text COLLATE utf8mb4_general_ci,
+  `purpose` text COLLATE utf8mb4_general_ci,
+  `valid_id_url` text COLLATE utf8mb4_general_ci,
+  `barangay_name` text COLLATE utf8mb4_general_ci,
+  `status` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'Pending',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `permit_type` varchar(100) COLLATE utf8mb4_general_ci DEFAULT 'Certificate of Good Moral Character',
+  `house_street` text COLLATE utf8mb4_general_ci,
+  `city` text COLLATE utf8mb4_general_ci,
+  `province` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -199,21 +199,21 @@ CREATE TABLE `goodmoral_requests` (
 --
 
 CREATE TABLE `indigency_requests` (
-  `id` bigint(20) NOT NULL,
-  `resident_id` bigint(20) DEFAULT NULL,
-  `fullname` text NOT NULL,
-  `email` text DEFAULT NULL,
-  `phone` text DEFAULT NULL,
-  `proof_of_income_url` text DEFAULT NULL,
-  `purpose` text DEFAULT NULL,
-  `valid_id_url` text DEFAULT NULL,
-  `barangay_name` text DEFAULT NULL,
-  `status` varchar(50) DEFAULT 'Pending',
-  `created_at` datetime DEFAULT current_timestamp(),
-  `permit_type` varchar(100) DEFAULT 'Certificate of Indigency',
-  `house_street` text DEFAULT NULL,
-  `city` text DEFAULT NULL,
-  `province` text DEFAULT NULL
+  `id` bigint NOT NULL,
+  `resident_id` bigint DEFAULT NULL,
+  `fullname` text COLLATE utf8mb4_general_ci NOT NULL,
+  `email` text COLLATE utf8mb4_general_ci,
+  `phone` text COLLATE utf8mb4_general_ci,
+  `proof_of_income_url` text COLLATE utf8mb4_general_ci,
+  `purpose` text COLLATE utf8mb4_general_ci,
+  `valid_id_url` text COLLATE utf8mb4_general_ci,
+  `barangay_name` text COLLATE utf8mb4_general_ci,
+  `status` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'Pending',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `permit_type` varchar(100) COLLATE utf8mb4_general_ci DEFAULT 'Certificate of Indigency',
+  `house_street` text COLLATE utf8mb4_general_ci,
+  `city` text COLLATE utf8mb4_general_ci,
+  `province` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -223,21 +223,21 @@ CREATE TABLE `indigency_requests` (
 --
 
 CREATE TABLE `latebirth_requests` (
-  `id` bigint(20) NOT NULL,
-  `resident_id` bigint(20) DEFAULT NULL,
-  `fullname` text NOT NULL,
-  `email` text DEFAULT NULL,
-  `phone` text DEFAULT NULL,
-  `birth_record_url` text DEFAULT NULL,
-  `purpose` text DEFAULT NULL,
-  `valid_id_url` text DEFAULT NULL,
-  `barangay_name` text DEFAULT NULL,
-  `status` varchar(50) DEFAULT 'Pending',
-  `created_at` datetime DEFAULT current_timestamp(),
-  `permit_type` varchar(100) DEFAULT 'Certificate of Late Birth Registration',
-  `house_street` text DEFAULT NULL,
-  `city` text DEFAULT NULL,
-  `province` text DEFAULT NULL
+  `id` bigint NOT NULL,
+  `resident_id` bigint DEFAULT NULL,
+  `fullname` text COLLATE utf8mb4_general_ci NOT NULL,
+  `email` text COLLATE utf8mb4_general_ci,
+  `phone` text COLLATE utf8mb4_general_ci,
+  `birth_record_url` text COLLATE utf8mb4_general_ci,
+  `purpose` text COLLATE utf8mb4_general_ci,
+  `valid_id_url` text COLLATE utf8mb4_general_ci,
+  `barangay_name` text COLLATE utf8mb4_general_ci,
+  `status` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'Pending',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `permit_type` varchar(100) COLLATE utf8mb4_general_ci DEFAULT 'Certificate of Late Birth Registration',
+  `house_street` text COLLATE utf8mb4_general_ci,
+  `city` text COLLATE utf8mb4_general_ci,
+  `province` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -247,20 +247,20 @@ CREATE TABLE `latebirth_requests` (
 --
 
 CREATE TABLE `norecord_requests` (
-  `id` bigint(20) NOT NULL,
-  `resident_id` bigint(20) DEFAULT NULL,
-  `fullname` text NOT NULL,
-  `email` text DEFAULT NULL,
-  `phone` text DEFAULT NULL,
-  `purpose` text DEFAULT NULL,
-  `valid_id_url` text DEFAULT NULL,
-  `barangay_name` text DEFAULT NULL,
-  `status` varchar(50) DEFAULT 'Pending',
-  `created_at` datetime DEFAULT current_timestamp(),
-  `permit_type` varchar(100) DEFAULT 'Certificate of No Record',
-  `house_street` text DEFAULT NULL,
-  `city` text DEFAULT NULL,
-  `province` text DEFAULT NULL
+  `id` bigint NOT NULL,
+  `resident_id` bigint DEFAULT NULL,
+  `fullname` text COLLATE utf8mb4_general_ci NOT NULL,
+  `email` text COLLATE utf8mb4_general_ci,
+  `phone` text COLLATE utf8mb4_general_ci,
+  `purpose` text COLLATE utf8mb4_general_ci,
+  `valid_id_url` text COLLATE utf8mb4_general_ci,
+  `barangay_name` text COLLATE utf8mb4_general_ci,
+  `status` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'Pending',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `permit_type` varchar(100) COLLATE utf8mb4_general_ci DEFAULT 'Certificate of No Record',
+  `house_street` text COLLATE utf8mb4_general_ci,
+  `city` text COLLATE utf8mb4_general_ci,
+  `province` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -270,18 +270,18 @@ CREATE TABLE `norecord_requests` (
 --
 
 CREATE TABLE `notifications` (
-  `id` bigint(20) NOT NULL,
-  `barangay_name` text NOT NULL,
-  `recipient_type` varchar(50) NOT NULL,
-  `recipient_id` bigint(20) DEFAULT NULL,
-  `source_table` text DEFAULT NULL,
-  `source_id` bigint(20) DEFAULT NULL,
-  `type` varchar(100) NOT NULL,
-  `title` text NOT NULL,
-  `message` text NOT NULL,
-  `link` text DEFAULT NULL,
-  `is_read` tinyint(1) DEFAULT 0,
-  `created_at` datetime DEFAULT current_timestamp()
+  `id` bigint NOT NULL,
+  `barangay_name` text COLLATE utf8mb4_general_ci NOT NULL,
+  `recipient_type` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `recipient_id` bigint DEFAULT NULL,
+  `source_table` text COLLATE utf8mb4_general_ci,
+  `source_id` bigint DEFAULT NULL,
+  `type` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `title` text COLLATE utf8mb4_general_ci NOT NULL,
+  `message` text COLLATE utf8mb4_general_ci NOT NULL,
+  `link` text COLLATE utf8mb4_general_ci,
+  `is_read` tinyint(1) DEFAULT '0',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -291,22 +291,22 @@ CREATE TABLE `notifications` (
 --
 
 CREATE TABLE `ojt_requests` (
-  `id` bigint(20) NOT NULL,
-  `resident_id` bigint(20) DEFAULT NULL,
-  `fullname` text NOT NULL,
-  `email` text DEFAULT NULL,
-  `phone` text DEFAULT NULL,
-  `school_name` text DEFAULT NULL,
-  `endorsement_letter_url` text DEFAULT NULL,
-  `purpose` text DEFAULT NULL,
-  `valid_id_url` text DEFAULT NULL,
-  `barangay_name` text DEFAULT NULL,
-  `status` varchar(50) DEFAULT 'Pending',
-  `created_at` datetime DEFAULT current_timestamp(),
-  `permit_type` varchar(100) DEFAULT 'Certificate of OJT / Training Endorsement',
-  `house_street` text DEFAULT NULL,
-  `city` text DEFAULT NULL,
-  `province` text DEFAULT NULL
+  `id` bigint NOT NULL,
+  `resident_id` bigint DEFAULT NULL,
+  `fullname` text COLLATE utf8mb4_general_ci NOT NULL,
+  `email` text COLLATE utf8mb4_general_ci,
+  `phone` text COLLATE utf8mb4_general_ci,
+  `school_name` text COLLATE utf8mb4_general_ci,
+  `endorsement_letter_url` text COLLATE utf8mb4_general_ci,
+  `purpose` text COLLATE utf8mb4_general_ci,
+  `valid_id_url` text COLLATE utf8mb4_general_ci,
+  `barangay_name` text COLLATE utf8mb4_general_ci,
+  `status` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'Pending',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `permit_type` varchar(100) COLLATE utf8mb4_general_ci DEFAULT 'Certificate of OJT / Training Endorsement',
+  `house_street` text COLLATE utf8mb4_general_ci,
+  `city` text COLLATE utf8mb4_general_ci,
+  `province` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -316,22 +316,22 @@ CREATE TABLE `ojt_requests` (
 --
 
 CREATE TABLE `residency_requests` (
-  `id` bigint(20) NOT NULL,
-  `resident_id` bigint(20) DEFAULT NULL,
-  `fullname` text NOT NULL,
-  `email` text DEFAULT NULL,
-  `phone` text DEFAULT NULL,
-  `house_street` text DEFAULT NULL,
-  `city` text DEFAULT NULL,
-  `province` text DEFAULT NULL,
+  `id` bigint NOT NULL,
+  `resident_id` bigint DEFAULT NULL,
+  `fullname` text COLLATE utf8mb4_general_ci NOT NULL,
+  `email` text COLLATE utf8mb4_general_ci,
+  `phone` text COLLATE utf8mb4_general_ci,
+  `house_street` text COLLATE utf8mb4_general_ci,
+  `city` text COLLATE utf8mb4_general_ci,
+  `province` text COLLATE utf8mb4_general_ci,
   `date_of_residency` date DEFAULT NULL,
-  `years_residency` int(11) DEFAULT NULL,
-  `purpose` text DEFAULT NULL,
-  `valid_id_url` text DEFAULT NULL,
-  `barangay_name` text DEFAULT NULL,
-  `status` varchar(50) DEFAULT 'Pending',
-  `created_at` datetime DEFAULT current_timestamp(),
-  `permit_type` varchar(100) DEFAULT 'Residency Certificate'
+  `years_residency` int DEFAULT NULL,
+  `purpose` text COLLATE utf8mb4_general_ci,
+  `valid_id_url` text COLLATE utf8mb4_general_ci,
+  `barangay_name` text COLLATE utf8mb4_general_ci,
+  `status` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'Pending',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `permit_type` varchar(100) COLLATE utf8mb4_general_ci DEFAULT 'Residency Certificate'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -341,29 +341,29 @@ CREATE TABLE `residency_requests` (
 --
 
 CREATE TABLE `residents` (
-  `id` bigint(20) NOT NULL,
-  `last_name` text NOT NULL,
-  `first_name` text NOT NULL,
-  `middle_name` text DEFAULT NULL,
-  `suffix` text DEFAULT NULL,
-  `phone` varchar(20) NOT NULL,
-  `email` text NOT NULL,
+  `id` bigint NOT NULL,
+  `last_name` text COLLATE utf8mb4_general_ci NOT NULL,
+  `first_name` text COLLATE utf8mb4_general_ci NOT NULL,
+  `middle_name` text COLLATE utf8mb4_general_ci,
+  `suffix` text COLLATE utf8mb4_general_ci,
+  `phone` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` text COLLATE utf8mb4_general_ci NOT NULL,
   `birthdate` date NOT NULL,
-  `house_no` text NOT NULL,
-  `street` text NOT NULL,
-  `purok` text NOT NULL,
-  `subdivision` text DEFAULT NULL,
-  `barangay` text NOT NULL,
-  `city` text NOT NULL,
-  `province` text NOT NULL,
-  `region` text NOT NULL,
-  `postal` varchar(10) NOT NULL,
-  `nationality` text NOT NULL,
-  `agree` tinyint(1) NOT NULL DEFAULT 0,
-  `updates` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `verification_status` varchar(20) NOT NULL DEFAULT 'Unverified',
-  `password` varchar(255) NOT NULL
+  `house_no` text COLLATE utf8mb4_general_ci NOT NULL,
+  `street` text COLLATE utf8mb4_general_ci NOT NULL,
+  `purok` text COLLATE utf8mb4_general_ci NOT NULL,
+  `subdivision` text COLLATE utf8mb4_general_ci,
+  `barangay` text COLLATE utf8mb4_general_ci NOT NULL,
+  `city` text COLLATE utf8mb4_general_ci NOT NULL,
+  `province` text COLLATE utf8mb4_general_ci NOT NULL,
+  `region` text COLLATE utf8mb4_general_ci NOT NULL,
+  `postal` varchar(10) COLLATE utf8mb4_general_ci NOT NULL,
+  `nationality` text COLLATE utf8mb4_general_ci NOT NULL,
+  `agree` tinyint(1) NOT NULL DEFAULT '0',
+  `updates` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `verification_status` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Unverified',
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -380,15 +380,15 @@ INSERT INTO `residents` (`id`, `last_name`, `first_name`, `middle_name`, `suffix
 --
 
 CREATE TABLE `resident_verifications` (
-  `id` bigint(20) NOT NULL,
-  `resident_id` bigint(20) NOT NULL,
-  `id_type` text NOT NULL,
-  `valid_id_url` text NOT NULL,
-  `submitted_at` datetime DEFAULT current_timestamp(),
-  `status` varchar(20) NOT NULL DEFAULT 'Pending',
-  `reviewed_by` text DEFAULT NULL,
+  `id` bigint NOT NULL,
+  `resident_id` bigint NOT NULL,
+  `id_type` text COLLATE utf8mb4_general_ci NOT NULL,
+  `valid_id_url` text COLLATE utf8mb4_general_ci NOT NULL,
+  `submitted_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `status` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Pending',
+  `reviewed_by` text COLLATE utf8mb4_general_ci,
   `reviewed_at` datetime DEFAULT NULL,
-  `remarks` text DEFAULT NULL
+  `remarks` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -398,21 +398,21 @@ CREATE TABLE `resident_verifications` (
 --
 
 CREATE TABLE `soloparent_requests` (
-  `id` bigint(20) NOT NULL,
-  `resident_id` bigint(20) DEFAULT NULL,
-  `fullname` text NOT NULL,
-  `email` text DEFAULT NULL,
-  `phone` text DEFAULT NULL,
-  `proof_of_solo_status_url` text DEFAULT NULL,
-  `purpose` text DEFAULT NULL,
-  `valid_id_url` text DEFAULT NULL,
-  `barangay_name` text DEFAULT NULL,
-  `status` varchar(50) DEFAULT 'Pending',
-  `created_at` datetime DEFAULT current_timestamp(),
-  `permit_type` varchar(100) DEFAULT 'Certificate of Solo Parent',
-  `house_street` text DEFAULT NULL,
-  `city` text DEFAULT NULL,
-  `province` text DEFAULT NULL
+  `id` bigint NOT NULL,
+  `resident_id` bigint DEFAULT NULL,
+  `fullname` text COLLATE utf8mb4_general_ci NOT NULL,
+  `email` text COLLATE utf8mb4_general_ci,
+  `phone` text COLLATE utf8mb4_general_ci,
+  `proof_of_solo_status_url` text COLLATE utf8mb4_general_ci,
+  `purpose` text COLLATE utf8mb4_general_ci,
+  `valid_id_url` text COLLATE utf8mb4_general_ci,
+  `barangay_name` text COLLATE utf8mb4_general_ci,
+  `status` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'Pending',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `permit_type` varchar(100) COLLATE utf8mb4_general_ci DEFAULT 'Certificate of Solo Parent',
+  `house_street` text COLLATE utf8mb4_general_ci,
+  `city` text COLLATE utf8mb4_general_ci,
+  `province` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -422,13 +422,13 @@ CREATE TABLE `soloparent_requests` (
 --
 
 CREATE TABLE `verification_rejects` (
-  `id` bigint(20) NOT NULL,
-  `resident_id` bigint(20) NOT NULL,
-  `id_type` text NOT NULL,
-  `valid_id_url` text NOT NULL,
-  `reason` text NOT NULL,
-  `rejected_at` datetime DEFAULT current_timestamp(),
-  `reviewed_by` text DEFAULT NULL
+  `id` bigint NOT NULL,
+  `resident_id` bigint NOT NULL,
+  `id_type` text COLLATE utf8mb4_general_ci NOT NULL,
+  `valid_id_url` text COLLATE utf8mb4_general_ci NOT NULL,
+  `reason` text COLLATE utf8mb4_general_ci NOT NULL,
+  `rejected_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `reviewed_by` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -440,13 +440,6 @@ CREATE TABLE `verification_rejects` (
 --
 ALTER TABLE `announcements`
   ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `barangay_admins`
---
-ALTER TABLE `barangay_admins`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`) USING HASH;
 
 --
 -- Indexes for table `barangay_clearance_requests`
@@ -526,13 +519,6 @@ ALTER TABLE `residency_requests`
   ADD KEY `resident_id` (`resident_id`);
 
 --
--- Indexes for table `residents`
---
-ALTER TABLE `residents`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`) USING HASH;
-
---
 -- Indexes for table `resident_verifications`
 --
 ALTER TABLE `resident_verifications`
@@ -561,186 +547,31 @@ ALTER TABLE `verification_rejects`
 -- AUTO_INCREMENT for table `announcements`
 --
 ALTER TABLE `announcements`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `barangay_admins`
---
-ALTER TABLE `barangay_admins`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `barangay_clearance_requests`
 --
 ALTER TABLE `barangay_clearance_requests`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `barangay_events`
 --
 ALTER TABLE `barangay_events`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `business_permit_requests`
 --
 ALTER TABLE `business_permit_requests`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `event_interest`
 --
 ALTER TABLE `event_interest`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `goodmoral_requests`
---
-ALTER TABLE `goodmoral_requests`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `indigency_requests`
---
-ALTER TABLE `indigency_requests`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `latebirth_requests`
---
-ALTER TABLE `latebirth_requests`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `norecord_requests`
---
-ALTER TABLE `norecord_requests`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `notifications`
---
-ALTER TABLE `notifications`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `ojt_requests`
---
-ALTER TABLE `ojt_requests`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `residency_requests`
---
-ALTER TABLE `residency_requests`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `residents`
---
-ALTER TABLE `residents`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `resident_verifications`
---
-ALTER TABLE `resident_verifications`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `soloparent_requests`
---
-ALTER TABLE `soloparent_requests`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `verification_rejects`
---
-ALTER TABLE `verification_rejects`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `barangay_clearance_requests`
---
-ALTER TABLE `barangay_clearance_requests`
-  ADD CONSTRAINT `barangay_clearance_requests_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`);
-
---
--- Constraints for table `barangay_events`
---
-ALTER TABLE `barangay_events`
-  ADD CONSTRAINT `barangay_events_ibfk_1` FOREIGN KEY (`linked_announcement_id`) REFERENCES `announcements` (`id`);
-
---
--- Constraints for table `business_permit_requests`
---
-ALTER TABLE `business_permit_requests`
-  ADD CONSTRAINT `business_permit_requests_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`);
-
---
--- Constraints for table `event_interest`
---
-ALTER TABLE `event_interest`
-  ADD CONSTRAINT `event_interest_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `barangay_events` (`id`),
-  ADD CONSTRAINT `event_interest_ibfk_2` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`);
-
---
--- Constraints for table `goodmoral_requests`
---
-ALTER TABLE `goodmoral_requests`
-  ADD CONSTRAINT `goodmoral_requests_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`);
-
---
--- Constraints for table `indigency_requests`
---
-ALTER TABLE `indigency_requests`
-  ADD CONSTRAINT `indigency_requests_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`);
-
---
--- Constraints for table `latebirth_requests`
---
-ALTER TABLE `latebirth_requests`
-  ADD CONSTRAINT `latebirth_requests_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`);
-
---
--- Constraints for table `norecord_requests`
---
-ALTER TABLE `norecord_requests`
-  ADD CONSTRAINT `norecord_requests_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`);
-
---
--- Constraints for table `ojt_requests`
---
-ALTER TABLE `ojt_requests`
-  ADD CONSTRAINT `ojt_requests_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`);
-
---
--- Constraints for table `residency_requests`
---
-ALTER TABLE `residency_requests`
-  ADD CONSTRAINT `residency_requests_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`);
-
---
--- Constraints for table `resident_verifications`
---
-ALTER TABLE `resident_verifications`
-  ADD CONSTRAINT `resident_verifications_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`);
-
---
--- Constraints for table `soloparent_requests`
---
-ALTER TABLE `soloparent_requests`
-  ADD CONSTRAINT `soloparent_requests_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`);
-
---
--- Constraints for table `verification_rejects`
---
-ALTER TABLE `verification_rejects`
-  ADD CONSTRAINT `verification_rejects_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`id`);
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
