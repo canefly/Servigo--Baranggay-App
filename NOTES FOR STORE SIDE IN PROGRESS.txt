@@ -1,0 +1,63 @@
+🔎 A. Resident as Viewer (Consumer)
+
+This is a fully verified Level 2 user browsing for help.
+
+They access:
+Public listings of verified businesses/services
+Filters/tags: Home-to-Home 🏡 vs Fixed 🏪, Licensed 📄 vs Informal 🏠
+Map view (optional future), open hours, contact info
+Service badges (e.g., 📄 Barangay-Cleared, 🧤 Approved Informal)
+Safety-first trust: every entry is barangay-vetted
+
+Use case thoughts:
+“I need a local plumber who can come to my house.”
+“I want to find nearby sari-sari stores that are open now.”
+“Which tutors are available in my barangay?”
+
+B. Resident as Provider (Aspirant)
+
+Only Level 2 verified residents can see an “Apply as Provider” button.
+
+➕ Application Flow:
+
+Choose type:
+
+🏡 Home-to-Home
+🏪 Fixed Location
+
+Select business nature:
+
+📄 Licensed Business
+🏠 Informal Worker
+
+Upload required proofs:
+
+📸 Photo of store or tools
+🧾 Barangay clearance or utility bill
+🧍‍♂️ Optional short bio/testimonial
+
+Submission auto-tags as Pending
+Entry is saved to services table or similar.
+
+Resident gets confirmation:
+“Your service has been submitted for review. You will be notified upon approval.”
+
+🧑‍💼 BARANGAY ADMIN SIDE — THE APPROVER
+🗂️ Where do these applications appear?
+
+In the Admin Dashboard > Services Tab
+
+Subtabs:
+
+🟡 Pending
+✅ Approved
+❌ Rejected
+🔍 What does the admin see per entry?
+
+Resident name
+Service type and category
+Barangay listed
+Submitted files (proofs, docs, photos)
+Business tag: Licensed 📄 or Informal 🏠
+Contact info
+Date submitted
