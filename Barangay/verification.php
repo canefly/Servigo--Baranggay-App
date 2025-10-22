@@ -4,14 +4,14 @@ require_once(__DIR__ . "/../Database/connection.php");
 requireRole("admin");
 
 // ------------ CONFIG ------------
-$barangay = $_SESSION['sg_brgy'] ?? '';
+$barangay    = $_SESSION['sg_brgy']  ?? '';
 $reviewed_by = $_SESSION['sg_email'] ?? 'admin';
 
 // ------------ AJAX: VERIFY / REJECT ------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
   header('Content-Type: text/plain');
 
-  $action      = $_POST['action'];                   // verify | reject
+  $action      = $_POST['action']; // verify | reject
   $resident_id = isset($_POST['resident_id']) ? intval($_POST['resident_id']) : 0;
   $reason      = trim($_POST['reason'] ?? '');
 
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     exit;
   }
 
-  // Kunin latest verification row ng resident (optional pero helpful)
+  // Latest verification row (if any) + barangay
   $ver = $conn->prepare("
     SELECT v.id, v.id_type, v.valid_id_url, r.barangay
     FROM residents r
@@ -40,12 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
   $row = $ver->get_result()->fetch_assoc();
   $ver->close();
 
-  $verif_id   = $row['id'] ?? null; // pwedeng null kung wala pang submission
-  $id_type    = $row['id_type'] ?? null;
-  $valid_id   = $row['valid_id_url'] ?? null;
-  $brgy_name  = $row['barangay'] ?? $barangay;
+  $verif_id  = $row['id']         ?? null;
+  $id_type   = $row['id_type']    ?? null;
+  $valid_id  = $row['valid_id_url'] ?? null;
+  $brgy_name = $row['barangay']   ?? $barangay;
 
-  // start transaction for safety
   $conn->begin_transaction();
   try {
     if ($action === 'verify') {
@@ -55,28 +54,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
       $u1->execute();
       $u1->close();
 
-      // 2) mark latest verification approved (if meron)
+      // 2) mark latest verification approved
       if ($verif_id) {
         $u2 = $conn->prepare("
           UPDATE resident_verifications 
              SET status='Approved', reviewed_by=?, reviewed_at=NOW(), remarks=NULL
-           WHERE id=?
-        ");
+           WHERE id=?");
         $u2->bind_param("si", $reviewed_by, $verif_id);
         $u2->execute();
         $u2->close();
       }
 
-      // 3) notification
+      // 3) notify resident
       $title = "Your account verification is approved";
       $msg   = "Your Servigo account has been verified.";
-      $link  = "/Resident/verification.php";
+      $link  = "/Resident/verifyAccount.php"; // resident-side page
       $n = $conn->prepare("
-        INSERT INTO notifications 
+        INSERT INTO notifications
           (barangay_name, recipient_type, recipient_id, source_table, source_id, type, title, message, link)
         VALUES (?, 'resident', ?, 'resident_verifications', ?, 'verification_approved', ?, ?, ?)
       ");
-      // source_id can be null; use 0 if walang verif row
       $sid = $verif_id ? $verif_id : 0;
       $n->bind_param("siisss", $brgy_name, $resident_id, $sid, $title, $msg, $link);
       $n->execute();
@@ -88,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         throw new Exception("Reason is required");
       }
 
-      // 1) mark resident as Unverified (or keep Pending if may flow ka; using Unverified here)
+      // 1) mark resident Unverified
       $u1 = $conn->prepare("UPDATE residents SET verification_status='Unverified' WHERE id=?");
       $u1->bind_param("i", $resident_id);
       $u1->execute();
@@ -99,30 +96,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $u2 = $conn->prepare("
           UPDATE resident_verifications 
              SET status='Rejected', reviewed_by=?, reviewed_at=NOW(), remarks=?
-           WHERE id=?
-        ");
+           WHERE id=?");
         $u2->bind_param("ssi", $reviewed_by, $reason, $verif_id);
         $u2->execute();
         $u2->close();
       }
 
-      // 3) insert to verification_rejects (archive/audit)
+      // 3) archive to verification_rejects (if may latest)
       if ($verif_id) {
         $insr = $conn->prepare("
           INSERT INTO verification_rejects (resident_id, id_type, valid_id_url, reason, reviewed_by, rejected_at)
-          VALUES (?, ?, ?, ?, ?, NOW())
-        ");
+          VALUES (?, ?, ?, ?, ?, NOW())");
         $insr->bind_param("issss", $resident_id, $id_type, $valid_id, $reason, $reviewed_by);
         $insr->execute();
         $insr->close();
       }
 
-      // 4) notification
+      // 4) notify resident (with reason)
       $title = "Your account verification was rejected";
       $msg   = "Reason: ".$reason;
-      $link  = "/Resident/verification.php";
+      $link  = "/Resident/verifyAccount.php";
       $n = $conn->prepare("
-        INSERT INTO notifications 
+        INSERT INTO notifications
           (barangay_name, recipient_type, recipient_id, source_table, source_id, type, title, message, link)
         VALUES (?, 'resident', ?, 'resident_verifications', ?, 'verification_rejected', ?, ?, ?)
       ");
@@ -146,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 include 'Components/barangaySidebar.php';
 include 'Components/barangayTopbar.php';
 
-// Pull residents scoped by barangay + latest verification (if any)
+// pull residents in this barangay + latest verification
 $rows = [];
 if ($barangay) {
   $q = $conn->prepare("
@@ -172,39 +167,34 @@ if ($barangay) {
   $q->close();
 }
 
-// split to unverified vs verified (based sa residents.verification_status)
 $unverified = [];
 $verified   = [];
 foreach ($rows as $r) {
   $card = [
-    'resident_id' => (int)$r['resident_id'],
-    'last_name'   => $r['last_name'],
-    'first_name'  => $r['first_name'],
-    'birthdate'   => $r['birthdate'],
-    'house_no'    => $r['house_no'],
-    'street'      => $r['street'],
-    'purok'       => $r['purok'],
-    'subdivision' => $r['subdivision'],
-    'barangay'    => $r['barangay'],
-    'city'        => $r['city'],
-    'province'    => $r['province'],
-    'region'      => $r['region'],
-    'postal'      => $r['postal'],
-    'nationality' => $r['nationality'],
-    'id_type'     => $r['id_type'],
-    'valid_id_url'=> $r['valid_id_url'],
-    'verif_id'    => $r['verif_id'],
+    'resident_id'  => (int)$r['resident_id'],
+    'last_name'    => $r['last_name'],
+    'first_name'   => $r['first_name'],
+    'birthdate'    => $r['birthdate'],
+    'house_no'     => $r['house_no'],
+    'street'       => $r['street'],
+    'purok'        => $r['purok'],
+    'subdivision'  => $r['subdivision'],
+    'barangay'     => $r['barangay'],
+    'city'         => $r['city'],
+    'province'     => $r['province'],
+    'region'       => $r['region'],
+    'postal'       => $r['postal'],
+    'nationality'  => $r['nationality'],
+    'id_type'      => $r['id_type'],
+    'valid_id_url' => $r['valid_id_url'],
+    'verif_id'     => $r['verif_id'],
   ];
-
   if (strtolower($r['verification_status']) === 'verified') {
     $verified[] = $card;
   } else {
-    // treat anything else as Unverified (includes 'Pending', 'Unverified')
-    $unverified[] = $card;
+    $unverified[] = $card; // includes Pending, Unverified
   }
 }
-
-// pass to JS
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -283,19 +273,22 @@ body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--
 .actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;}
 .btn{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
   padding:8px 16px;border-radius:12px;font-weight:700;font-size:.9rem;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.btn.view{background:#e5e7eb;color:#111;}
 .btn.verify{background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;}
 .btn.reject{background:var(--declined);color:#fff;}
 
 .no-residents{text-align:center;color:var(--muted);font-size:1rem;margin-top:30px;}
 @media(max-width:768px){.dashboard-title{font-size:1.2rem;}.btn{flex:1;}}
 
-/* Reject Modal */
+/* Modals */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;}
 .modal-bg.active{display:flex;}
-.modal{background:#fff;border-radius:var(--radius);padding:22px;width:95%;max-width:520px;}
+.modal{background:#fff;border-radius:var(--radius);padding:22px;width:95%;max-width:720px;}
 .modal h3{margin-top:0;color:var(--brand);}
 .modal textarea{width:100%;height:110px;border-radius:10px;border:1px solid var(--border);padding:10px;}
 .modal-actions{margin-top:12px;display:flex;justify-content:flex-end;gap:8px;}
+.modal-body{max-height:70vh;overflow:auto;}
+.modal-body img{max-width:100%;border-radius:10px;border:1px solid var(--border);}
 </style>
 </head>
 <body>
@@ -323,6 +316,17 @@ body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--
   </main>
 </div>
 
+<!-- View ID Modal -->
+<div id="idModal" class="modal-bg">
+  <div class="modal">
+    <h3>Submitted ID</h3>
+    <div id="idModalBody" class="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeIdModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- Reject Modal -->
 <div id="rejectModal" class="modal-bg">
   <form class="modal" onsubmit="submitReject(event)">
@@ -346,6 +350,19 @@ let unverified = [...UNVERIFIED];
 let verified   = [...VERIFIED];
 let activeTab  = "unverified";
 
+// fix path helper (prefix ../ if relative to site root)
+function fixUrl(u){
+  if(!u) return '';
+  if(/^https?:\/\//i.test(u)) return u;
+  if(u.startsWith('/')) return '..' + u;           // '/uploads/...'
+  if(u.startsWith('uploads/')) return '../' + u;   // 'uploads/...'
+  if(u.startsWith('../')) return u;
+  return '../' + u;                                 // fallback
+}
+
+function isPdf(u){ return /\.pdf(\?|#|$)/i.test(u); }
+function safe(v){ return (v===null || v===undefined || v==='') ? '—' : String(v); }
+
 // ====== Rendering ======
 function render(){
   const list=document.getElementById("residentsList"); list.innerHTML="";
@@ -356,6 +373,22 @@ function render(){
     const card=document.createElement("div");
     card.className="resident-card";
     card.dataset.resident=r.resident_id;
+
+    const idBlock = r.valid_id_url
+      ? (isPdf(r.valid_id_url)
+          ? `<div class="id-preview" style="color:#334155">
+               <i class='bx bxs-file-pdf'></i> PDF Provided
+             </div>
+             <div class="actions" style="margin-top:8px">
+               <a class="btn view" href="${fixUrl(r.valid_id_url)}" target="_blank"><i class='bx bx-link-external'></i> Open PDF</a>
+             </div>`
+          : `<div class="id-preview">
+               <img src="${fixUrl(r.valid_id_url)}" alt="Valid ID" onclick="openIdModal('${encodeURIComponent(fixUrl(r.valid_id_url))}','')">
+             </div>
+             <div class="actions" style="margin-top:8px">
+               <button class="btn view" onclick="openIdModal('${encodeURIComponent(fixUrl(r.valid_id_url))}','')"><i class='bx bx-expand'></i> View ID</button>
+             </div>`)
+      : `<div style="color:#6b7280">No ID submitted yet.</div>`;
 
     card.innerHTML=`
       <div class="resident-header">
@@ -383,11 +416,7 @@ function render(){
           <div class="field">ID Type: ${safe(r.id_type) || "—"}</div>
         </div>
 
-        <div class="id-section">
-          <div class="id-preview">
-            ${r.valid_id_url ? `<img src="${r.valid_id_url}" alt="Valid ID">` : `<div style="color:#6b7280">No ID submitted yet.</div>`}
-          </div>
-        </div>
+        <div class="id-section">${idBlock}</div>
 
         ${activeTab==="unverified" ? `
         <div class="actions">
@@ -404,23 +433,22 @@ function render(){
     toggle.onclick = ()=>{
       document.querySelectorAll(".resident-card.open").forEach(c=>{
         c.classList.remove("open");
-        c.querySelector(".resident-body").style.display="none";
+        const b = c.querySelector(".resident-body");
+        if (b) b.style.display="none";
       });
       card.classList.add("open");
       body.style.display="block";
     };
     closeBtn.onclick = ()=>{card.classList.remove("open");body.style.display="none";};
 
-    body.addEventListener("click", (e)=>{
-      if (e.target.closest(".btn.verify")) verifyResident(r.resident_id, card);
+    card.addEventListener("click",(e)=>{
+      if (e.target.closest(".btn.verify")) verifyResident(r.resident_id);
       if (e.target.closest(".btn.reject")) openReject(r.resident_id);
     });
 
     list.appendChild(card);
   });
 }
-
-function safe(v){ return (v===null || v===undefined || v==='') ? '—' : String(v); }
 
 // ====== Tabs ======
 document.getElementById("tab-unverified").onclick=()=>{activeTab="unverified";setActiveTab();};
@@ -431,8 +459,24 @@ function setActiveTab(){
   render();
 }
 
+// ====== View ID Modal ======
+function openIdModal(encodedUrl, isPdfFlag){
+  const url = decodeURIComponent(encodedUrl);
+  const body = document.getElementById('idModalBody');
+  if (isPdf(url)) {
+    body.innerHTML = `
+      <p style="margin:0 0 8px;color:#334155"><i class='bx bxs-file-pdf'></i> PDF Provided</p>
+      <a href="${url}" target="_blank" class="btn view"><i class='bx bx-link-external'></i> Open PDF in new tab</a>
+    `;
+  } else {
+    body.innerHTML = `<img src="${url}" alt="Valid ID">`;
+  }
+  document.getElementById('idModal').classList.add('active');
+}
+function closeIdModal(){ document.getElementById('idModal').classList.remove('active'); }
+
 // ====== Verify / Reject ======
-function verifyResident(residentId, card){
+function verifyResident(residentId){
   const f = new FormData();
   f.append('action','verify');
   f.append('resident_id', residentId);
@@ -440,16 +484,18 @@ function verifyResident(residentId, card){
   fetch('', { method:'POST', body:f })
     .then(r=>r.text())
     .then(txt=>{
-      // optimistic UI
+      // optimistic UI: move card to verified
+      const item = unverified.find(x=>x.resident_id===residentId);
       unverified = unverified.filter(x=>x.resident_id !== residentId);
-      const found = [...UNVERIFIED, ...VERIFIED].find(x=>x.resident_id===residentId) || null;
-      if (found) verified.push(found); // push a copy
-      render();
-    });
+      if (item) verified.unshift(item);
+      setActiveTab();
+    })
+    .catch(()=>alert('Error verifying resident.'));
 }
 
 function openReject(residentId){
   document.getElementById('rej_resident').value = residentId;
+  document.getElementById('rej_reason').value = '';
   document.getElementById('rejectModal').classList.add('active');
 }
 function closeReject(){
@@ -457,7 +503,7 @@ function closeReject(){
 }
 function submitReject(e){
   e.preventDefault();
-  const residentId = document.getElementById('rej_resident').value;
+  const residentId = +document.getElementById('rej_resident').value;
   const reason = document.getElementById('rej_reason').value.trim();
   if (!reason) return;
 
@@ -469,11 +515,11 @@ function submitReject(e){
   fetch('', { method:'POST', body:f })
     .then(r=>r.text())
     .then(txt=>{
-      // optimistic UI
-      unverified = unverified.filter(x=>x.resident_id !== +residentId);
+      unverified = unverified.filter(x=>x.resident_id !== residentId);
       closeReject();
-      setActiveTab(); // re-render
-    });
+      setActiveTab();
+    })
+    .catch(()=>alert('Error rejecting resident.'));
 }
 
 setActiveTab(); // initial render
