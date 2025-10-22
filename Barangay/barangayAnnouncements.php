@@ -1,6 +1,6 @@
 <?php
 // =======================================================
-// Barangay Announcements (Native SQL version)
+// Barangay Announcements (One-Path Refactor)
 // =======================================================
 require_once(__DIR__ . "/../Database/session-checker.php");
 requireRole("admin");
@@ -9,13 +9,11 @@ include 'Components/barangaySidebar.php';
 include 'Components/barangayTopbar.php';
 
 /* ==========================================================
-   Resolve barangay_name from real DB (no hard-coding)
+   Resolve barangay_name from DB
 ========================================================== */
 function resolveBarangayName(mysqli $conn): string {
-    // 1) already cached?
     if (!empty($_SESSION['barangay_name'])) return $_SESSION['barangay_name'];
 
-    // 2) try email keys first
     $email = $_SESSION['admin_email'] ?? $_SESSION['email'] ?? null;
     if ($email) {
         $q = $conn->prepare("SELECT barangay_name FROM barangay_admins WHERE email = ? LIMIT 1");
@@ -27,7 +25,6 @@ function resolveBarangayName(mysqli $conn): string {
         if (!empty($bn)) { $_SESSION['barangay_name'] = $bn; return $bn; }
     }
 
-    // 3) fall back to id keys if present
     $adminId = $_SESSION['admin_id'] ?? $_SESSION['user_id'] ?? null;
     if ($adminId) {
         $q = $conn->prepare("SELECT barangay_name FROM barangay_admins WHERE id = ? LIMIT 1");
@@ -39,57 +36,72 @@ function resolveBarangayName(mysqli $conn): string {
         if (!empty($bn)) { $_SESSION['barangay_name'] = $bn; return $bn; }
     }
 
-    // 4) hard stop — nothing to infer
-    die("<h3 style='color:#b91c1c;text-align:center;margin:48px 0;'>⚠️ Unable to resolve your barangay. Please re-login so we can read it from barangay_admins.</h3>");
+    die("<h3 style='color:#b91c1c;text-align:center;margin:48px 0;'>⚠️ Unable to resolve your barangay. Please re-login.</h3>");
 }
 
 $barangay_name = resolveBarangayName($conn);
 
-// Handle Deletion before HTML render to prevent output errors
+/* ==========================================================
+   Universal URL Builder (cross-platform)
+========================================================== */
+function buildPublicURL($subfolder, $filename) {
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host   = $_SERVER['HTTP_HOST'];                       // servigo.canefly.xyz
+    $root   = preg_replace('#/Barangay$#i', '', dirname($_SERVER['SCRIPT_NAME']));  
+    return preg_replace('#/+#', '/', "$scheme://$host$root/uploads/$subfolder/$filename");
+}
+
+/* ==========================================================
+   DELETE announcement
+========================================================== */
 if (isset($_POST["delete"]) && !empty($_POST["delete_id"])) {
     $del_id = intval($_POST["delete_id"]);
-    $del = $conn->prepare("DELETE FROM announcements WHERE id = ?");
+    $old = $conn->prepare("SELECT image_url FROM announcements WHERE id=?");
+    $old->bind_param("i", $del_id);
+    $old->execute();
+    $res = $old->get_result();
+    if ($row = $res->fetch_assoc()) {
+        $filePath = realpath(__DIR__ . "/../" . ltrim($row['image_url'], '/'));
+        if ($filePath && file_exists($filePath)) unlink($filePath);
+    }
+    $del = $conn->prepare("DELETE FROM announcements WHERE id=?");
     $del->bind_param("i", $del_id);
     $del->execute();
-    header("Location: barangayAnnouncements.php"); // <-- correct target
+    header("Location: barangayAnnouncements.php");
     exit();
 }
 
-// Handle Create
+/* ==========================================================
+   CREATE announcement
+========================================================== */
 $msg = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["title"]) && !isset($_POST["delete"])) {
     $title = trim($_POST["title"]);
     $description = trim($_POST["description"]);
     $category = $_POST["category"];
     $image_url = null;
-    $image_path = null;
 
-    // ✅ Handle image upload (if any)
     if (!empty($_FILES["image"]["name"])) {
-        $upload_dir = __DIR__ . "/../uploads/announcements/";
-        if (!file_exists($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
-        $file_name = time() . "_" . basename($_FILES["image"]["name"]);
-        $target_path = $upload_dir . $file_name;
+        $subfolder = "announcements";
+        $upload_dir = __DIR__ . "/../uploads/$subfolder/";
+        if (!file_exists($upload_dir)) mkdir($upload_dir, 0777, true);
+
+        $filename = time() . "_" . preg_replace('/\s+/', '_', basename($_FILES["image"]["name"]));
+        $target_path = $upload_dir . $filename;
 
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_path)) {
-            // build public URL relative to project root (works under /servigo/)
-            $base_url = dirname($_SERVER['SCRIPT_NAME'], 2);
-            $image_url = $base_url . "/uploads/announcements/" . $file_name;
-            $image_path = $target_path;
+            $image_url = "uploads/$subfolder/$filename";
         } else {
             $msg = "<p class='error'>❌ Failed to upload image.</p>";
         }
     }
 
-    // ✅ Insert into database
     if (!$msg) {
         $stmt = $conn->prepare("
-            INSERT INTO announcements (barangay_name, title, description, category, image_url, image_path, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, NOW())
+            INSERT INTO announcements (barangay_name, title, description, category, image_url, created_at)
+            VALUES (?, ?, ?, ?, ?, NOW())
         ");
-        $stmt->bind_param("ssssss", $barangay_name, $title, $description, $category, $image_url, $image_path);
+        $stmt->bind_param("sssss", $barangay_name, $title, $description, $category, $image_url);
         if ($stmt->execute()) {
             $msg = "<p class='ok'>✅ Announcement posted successfully!</p>";
         } else {
@@ -147,9 +159,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["title"]) && !isset($_
 <div class="layout">
   <main class="main-content">
 
-    <!-- ==========================================================
-         CREATE ANNOUNCEMENT
-    =========================================================== -->
+    <!-- CREATE -->
     <section class="card">
       <h2>Create Announcement</h2>
       <?php echo $msg; ?>
@@ -170,9 +180,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["title"]) && !isset($_
       </form>
     </section>
 
-    <!-- ==========================================================
-         ANNOUNCEMENT FEED
-    =========================================================== -->
+    <!-- LIST -->
     <section class="card">
       <h2>My Announcements</h2>
       <?php
@@ -196,7 +204,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["title"]) && !isset($_
               echo "<h3>" . htmlspecialchars($row['title']) . "</h3>";
               echo "<p>" . nl2br(htmlspecialchars($row['description'])) . "</p>";
               if (!empty($row['image_url'])) {
-                  echo "<img src='" . htmlspecialchars($row['image_url']) . "' alt='Announcement Image'>";
+                  $imgSrc = '/' . ltrim($row['image_url'], '/');
+                  echo "<img src='" . htmlspecialchars($imgSrc) . "' alt='Announcement Image'>";
               }
               echo "<form method='POST' style='margin-top:8px;'>
                       <input type='hidden' name='delete_id' value='" . $row['id'] . "'>
