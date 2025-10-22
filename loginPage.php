@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <p class="register-hint">
       Don’t have an account? 
-      <a href="registrationPage.php">Create one</a>
+      <a href="Resident/registrationPage.php">Create one</a>
     </p>
 
     <p class="muted small">© 2025 Servigo — Prototype only</p>
