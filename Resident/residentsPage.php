@@ -284,6 +284,7 @@ footer{
 </head>
 
 <body>
+  <?php include 'chat.html'; ?>
 <main class="container">
 
   <!-- ======= TOP SUMMARY CARDS ======= -->
