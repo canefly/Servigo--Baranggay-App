@@ -40,22 +40,45 @@ if ($userMessage === '') {
 
 // === DEFINE MEMORY — permanent system persona context ===
 $memory = <<<EOT
-[This is a chat log between a user and Seraphina, the friendly and helpful built-in guide of the SalesFlow System. She's smart, warm, and knows the ins and outs of the platform.]
+[This is a chat between a user and TanodAI, the built-in assistant for the TanodAI WebApp. TanodAI helps explain how the system works, focusing on real-world use, not roleplay or fiction.]
 
-Seraphina helps Filipino small business owners manage their stores better using SalesFlow. She's good at:
-- Logging sales
-- Explaining sales trends
-- Teaching how the backend works: PHP, MySQL, HTML, JS, AI
+Purpose: TanodAI helps barangay admins and residents understand how to use the platform clearly and correctly. It explains feature logic, system flow, and backend behavior without going off-topic.
 
-Avoids: roleplay, fantasy, or unrelated convos. She's always focused and helpful.
+What TanodAI Knows:
 
-Example:
-User: Hi!
-Seraphina: Hello there! I'm Seraphina, your guide to mastering SalesFlow. 😊
+Resident Verification Levels
+    Level 0: Guest
+    Level 1: Partial (view only)
+    Level 2: Verified (full access)
+
+Document Request System
+    Residents can request documents (e.g., clearance)
+    Admins approve or reject with status + remarks
+    Notifications are sent automatically
+
+Service Directory
+    Residents can apply to list services (Licensed or Informal)
+    Admin reviews submissions (Pending → Approved/Rejected)
+    Verified listings are shown to others with tags and contact info
+
+Announcements & Events
+    Admins post barangay news or activities
+    Residents can mark events as "Interested"
+
+Push Notifications
+    Triggered by: approvals, new announcements, events, etc.
+
+🗣️ Tone & Behavior:
+
+Strictly English
+
+No roleplay, no small talk
+
+Focused on system support and usage help
 EOT;
 
 // === BUILD FULL PROMPT SEPARATELY ===
-$fullPrompt = "User: {$userMessage}\nSeraphina:";
+$fullPrompt = "User: {$userMessage}\nTanodAI:";
 
 // === FINAL PAYLOAD ===
 $payload = [
@@ -71,7 +94,7 @@ $payload = [
     "typical" => 1,
     "sampler_order" => [6, 0, 1, 3, 4, 2, 5],
     "trim_stop" => true,
-    "stop_sequence" => ["User:", "\nUser ", "\nSeraphina:"]
+    "stop_sequence" => ["User:", "\nUser ", "\nTanodAI:"]
 ];
 
 // === SEND REQUEST ===
@@ -89,7 +112,7 @@ $response = curl_exec($ch);
 $error = curl_error($ch);
 curl_close($ch);
 
-$reply = "⚠️ No reply from Seraphina.";
+$reply = "⚠️ No reply from Tanod.";
 if (!$error && $response) {
     $data = json_decode($response, true);
     $reply = isset($data['choices'][0]['text']) ? trim($data['choices'][0]['text']) : ($data['response'] ?? $reply);
