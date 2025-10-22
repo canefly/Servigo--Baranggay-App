@@ -109,9 +109,10 @@ if ($changed && $action === 'Rejected' && $reason !== '' && $resident) {
   }
 }
 
-// ✅ If Completed => notify resident (auto-fetch resident_id if missing)
-if ($changed && $action === 'Completed') {
-  // 🟢 step 1: kung walang naipasa na resident_id, kunin ulit sa table
+
+// ✅ If Ready => notify resident
+if ($changed && $action === 'Ready') {
+  // 🟢 auto fetch resident if missing
   if (!$resident) {
     $check = $conn->prepare("SELECT resident_id FROM $table WHERE id=?");
     $check->bind_param("i", $id);
@@ -121,7 +122,48 @@ if ($changed && $action === 'Completed') {
     $resident = $resRow['resident_id'] ?? null;
   }
 
-  // 🟢 step 2: kung may resident na, mag-insert ng notification
+  if ($resident) {
+    $q = $conn->prepare("SELECT barangay_name, permit_type FROM $table WHERE id=?");
+    $q->bind_param("i", $id);
+    $q->execute();
+    $r = $q->get_result()->fetch_assoc();
+    $q->close();
+
+    if ($r) {
+      $notif = $conn->prepare("
+        INSERT INTO notifications 
+        (barangay_name, recipient_type, recipient_id, source_table, source_id, type, title, message, link)
+        VALUES (?, 'resident', ?, ?, ?, 'request_ready', ?, ?, ?)
+      ");
+      $title = "Your {$r['permit_type']} request is ready for claiming!";
+      $msg   = "You may now claim your document at the barangay office.";
+      $link  = "/Resident/MyRequest.php";
+      $notif->bind_param("sisssss", 
+        $r['barangay_name'], 
+        $resident, 
+        $table, 
+        $id, 
+        $title, 
+        $msg, 
+        $link
+      );
+      $notif->execute();
+      $notif->close();
+    }
+  }
+}
+
+// ✅ If Completed => notify resident
+if ($changed && $action === 'Completed') {
+  if (!$resident) {
+    $check = $conn->prepare("SELECT resident_id FROM $table WHERE id=?");
+    $check->bind_param("i", $id);
+    $check->execute();
+    $resRow = $check->get_result()->fetch_assoc();
+    $check->close();
+    $resident = $resRow['resident_id'] ?? null;
+  }
+
   if ($resident) {
     $q = $conn->prepare("SELECT barangay_name, permit_type FROM $table WHERE id=?");
     $q->bind_param("i", $id);
@@ -135,8 +177,8 @@ if ($changed && $action === 'Completed') {
         (barangay_name, recipient_type, recipient_id, source_table, source_id, type, title, message, link)
         VALUES (?, 'resident', ?, ?, ?, 'request_completed', ?, ?, ?)
       ");
-      $title = "Your {$r['permit_type']} request is now completed!";
-      $msg   = "You may now claim your document at the barangay office.";
+      $title = "Your {$r['permit_type']} request has been claimed!";
+      $msg   = "Your document has been successfully received from the barangay office.";
       $link  = "/Resident/MyRequest.php";
       $notif->bind_param("sisssss", 
         $r['barangay_name'], 
@@ -263,7 +305,59 @@ body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);}
 .no-requests{text-align:center;color:var(--muted);margin-top:40px;}
 .view-modal .row{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap;}
 .view-modal .lbl{min-width:160px;color:#6b7280;font-weight:600;}
-.view-modal img{max-width:100%;border:1px solid var(--border);border-radius:10px;margin-top:4px;}
+/* Responsive attachment thumbnails */
+.view-modal .attachments {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.view-modal .attachments img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: transform .2s ease;
+}
+
+.view-modal .attachments img:hover {
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .view-modal .attachments {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}
+.view-modal img{
+  max-width:100%;
+  height:auto;
+  border:1px solid var(--border);
+  border-radius:10px;
+  margin-top:6px;
+  display:block;
+  object-fit:contain;
+  transition:transform .2s ease;
+}
+.view-modal img:hover{
+  transform:scale(1.03);
+}
+.view-modal .row img{
+  max-width:160px; /* 🟢 thumbnail size on desktop */
+}
+@media (max-width:768px){
+  .view-modal .row img{
+    max-width:120px; /* 📱 smaller on phones */
+  }
+  .view-modal .row{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -316,6 +410,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);}
                 <button class="btn ready-btn" onclick="markDone(this)"><i class='bx bx-check'></i> Mark as Done</button>
                 <button class="btn view-btn" onclick="openView(this)"><i class='bx bx-show'></i> View</button>
               <?php else: ?>
+                <button class="btn print-btn" onclick="window.open('print_template.php?table=<?= $r['table_name'] ?>&id=<?= $r['id'] ?>','_blank')"><i class='bx bx-printer'></i> Print</button>
                 <button class="btn view-btn" onclick="openView(this)"><i class='bx bx-show'></i> View</button>
               <?php endif; ?>
             </div>
@@ -483,6 +578,7 @@ function printRequest(btn) {
     });
 }
 
+
 /* ========== Mark Completed ========== */
 function markDone(btn) {
   const card  = btn.closest('.request-card');
@@ -508,7 +604,7 @@ function markDone(btn) {
 }
 
 
-/* ========== View Modal ========== */
+/* ========== View Modal (uniform attachment gallery + full view) ========== */
 function openView(btn){
   const card  = btn.closest('.request-card');
   const id    = card.dataset.id;
@@ -520,10 +616,13 @@ function openView(btn){
       const b = document.getElementById('viewBody');
       if (!data || Object.keys(data).length === 0) {
         b.innerHTML = "<div style='color:#ef4444'>No data found.</div>";
-      } else {
-        // Build rows (common fields first; fallbacks included)
-        const safe = v => (v==null || v==='') ? '—' : String(v);
-        const lines = [];
+        return;
+      }
+
+      const safe = v => (v==null || v==='') ? '—' : String(v);
+      const lines = [];
+
+      // 🧍 Basic details
         lines.push(row("Full Name",  safe(data.fullname || ((data.first_name||'') + ' ' + (data.last_name||'')))));
         lines.push(row("Email",      safe(data.email)));
         lines.push(row("Phone",      safe(data.phone)));
@@ -534,29 +633,67 @@ function openView(btn){
         lines.push(row("Date of Residency", safe(data.date_of_residency)));
         lines.push(row("Years of Residency", safe(data.years_residency)));
         lines.push(row("Purpose",    safe(data.purpose)));
-        if (data.valid_id_url) {
-          lines.push(`<div class="row"><div class="lbl">Valid ID:</div><div><img src="${data.valid_id_url}" alt="Valid ID"></div></div>`);
+
+      // 🖼 Collect all possible attachments (Valid ID + requirements)
+      const fileFields = [
+        ["valid_id_url", "Valid ID"],
+        ["proof_of_income_url", "Proof of Income"],
+        ["barangay_clearance_url", "Barangay Clearance"],
+        ["proof_of_solo_status_url", "Proof of Solo Status"],
+        ["birth_record_url", "Birth Record"],
+        ["endorsement_letter_url", "Endorsement Letter"],
+        ["dti_cert_url", "DTI Certificate"],
+        ["lease_contract_url", "Lease Contract"]
+      ];
+
+      const attachments = [];
+      fileFields.forEach(([key, label]) => {
+        if (!data[key]) return;
+        const filePath = data[key].startsWith('uploads/') ? data[key] : 'uploads/' + data[key];
+        const viewLink = `view_attachment.php?file=${encodeURIComponent(filePath)}&label=${encodeURIComponent(label)}`;
+        const isPDF = filePath.toLowerCase().endsWith('.pdf');
+
+        if (isPDF) {
+          // 📄 PDF button thumbnail
+          attachments.push(`
+            <a href="${viewLink}" target="_blank" class="btn view-btn"
+              style="font-size:.8rem;padding:4px 8px;text-align:center;">
+              ${label} (PDF)
+            </a>
+          `);
+        } else {
+          // 🖼 image thumbnail
+          attachments.push(`
+            <a href="${viewLink}" target="_blank" title="${label}">
+              <img src="../${filePath}" alt="${label}">
+            </a>
+          `);
         }
-        // Table-specific extras
-        if (data.business_name)      lines.push(row("Business Name", safe(data.business_name)));
-        if (data.business_type)      lines.push(row("Business Type", safe(data.business_type)));
-        if (data.school_name)        lines.push(row("School", safe(data.school_name)));
-        if (data.proof_of_income_url)lines.push(linkRow("Proof of Income", data.proof_of_income_url));
-        if (data.proof_of_solo_status_url) lines.push(linkRow("Solo Parent Proof", data.proof_of_solo_status_url));
-        if (data.barangay_clearance_url)   lines.push(linkRow("Barangay Clearance", data.barangay_clearance_url));
-        if (data.birth_record_url)         lines.push(linkRow("Birth Record", data.birth_record_url));
-        if (data.dti_cert_url)             lines.push(linkRow("DTI Certificate", data.dti_cert_url));
-        if (data.lease_contract_url)       lines.push(linkRow("Lease Contract", data.lease_contract_url));
+      });
 
-        lines.push(`<hr>`);
-        lines.push(row("Status", safe(data.status)));
-        lines.push(row("Submitted", safe(data.created_at)));
-
-        b.innerHTML = lines.join('');
+      // 🧱 Attachment Gallery Block
+      if (attachments.length) {
+        lines.push(`<div class="attachments">${attachments.join('')}</div>`);
       }
+
+      lines.push(`<hr>`);
+      lines.push(row("Status", safe(data.status)));
+      lines.push(row("Submitted", safe(data.created_at)));
+
+      b.innerHTML = lines.join('');
       document.getElementById('viewModal').classList.add('active');
     });
 }
+
+function closeView(){
+  document.getElementById('viewModal').classList.remove('active');
+}
+function row(label, value){
+  return `<div class="row"><div class="lbl">${label}:</div><div>${value}</div></div>`;
+}
+
+
+
 function closeView(){ document.getElementById('viewModal').classList.remove('active'); }
 function row(label, value){ return `<div class="row"><div class="lbl">${label}:</div><div>${value}</div></div>`; }
 function linkRow(label, url){ return `<div class="row"><div class="lbl">${label}:</div><div><a href="${url}" target="_blank">${url}</a></div></div>`; }
