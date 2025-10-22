@@ -284,6 +284,7 @@ footer{
 </head>
 
 <body>
+  <?php include 'chat.html'; ?>
 <main class="container">
 
   <!-- ======= TOP SUMMARY CARDS ======= -->
@@ -337,7 +338,7 @@ footer{
             <h3><?= htmlspecialchars($item['title']) ?></h3>
             <p class="desc"><?= nl2br(htmlspecialchars($item['description'])) ?></p>
             <?php if (!empty($item['image_url'])): ?>
-              <img src="<?= htmlspecialchars($item['image_url']) ?>" alt="Announcement Image" style="width:100%;border-radius:10px;margin-top:.5rem;">
+              <img src="/<?= ltrim(htmlspecialchars($item['image_url']), '/') ?>" alt="Announcement Image" style="width:100%;border-radius:10px;margin-top:.5rem;">
             <?php endif; ?>
           </article>
         <?php endforeach; ?>
