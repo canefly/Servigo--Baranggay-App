@@ -94,7 +94,7 @@ if ($changed && $action === 'Rejected' && $reason !== '' && $resident) {
     ");
     $title = "Your {$r['permit_type']} request was declined";
     $msg   = "Reason: " . $reason;
-    $link  = "/Resident/requests.php";
+    $link  = "/Resident/MyRequest.php";
     $notif->bind_param("sisssss", 
       $r['barangay_name'], 
       $resident, 
@@ -137,7 +137,7 @@ if ($changed && $action === 'Completed') {
       ");
       $title = "Your {$r['permit_type']} request is now completed!";
       $msg   = "You may now claim your document at the barangay office.";
-      $link  = "/Resident/requests.php";
+      $link  = "/Resident/MyRequest.php";
       $notif->bind_param("sisssss", 
         $r['barangay_name'], 
         $resident, 
