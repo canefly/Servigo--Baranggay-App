@@ -4,7 +4,6 @@ requireRole("resident");
 require_once(__DIR__ . "/../Database/connection.php");
 include 'Components/topbar.php';
 
-
 $resident_id = $_SESSION['sg_id'] ?? null;
 $barangay    = $_SESSION['sg_brgy'] ?? 'Unknown Barangay';
 
@@ -22,15 +21,31 @@ $stmt->bind_result($eventCount);
 $stmt->fetch();
 $stmt->close();
 
-// 🧾 Count pending permits by resident
+// 🧾 Count all pending permits for this resident
 $permitCount = 0;
 if ($resident_id) {
-  $stmt = $conn->prepare("SELECT COUNT(*) FROM barangay_clearance_requests WHERE resident_id=? AND status='Pending'");
-  $stmt->bind_param("i", $resident_id);
-  $stmt->execute();
-  $stmt->bind_result($permitCount);
-  $stmt->fetch();
-  $stmt->close();
+  $tables = [
+    "barangay_clearance_requests",
+    "residency_requests",
+    "indigency_requests",
+    "goodmoral_requests",
+    "soloparent_requests",
+    "latebirth_requests",
+    "norecord_requests",
+    "ojt_requests",
+    "business_permit_requests"
+  ];
+  foreach ($tables as $tbl) {
+    if ($conn->query("SHOW TABLES LIKE '$tbl'")->num_rows > 0) {
+      $stmt = $conn->prepare("SELECT COUNT(*) FROM `$tbl` WHERE resident_id=? AND status='Pending'");
+      $stmt->bind_param("i", $resident_id);
+      $stmt->execute();
+      $stmt->bind_result($count);
+      $stmt->fetch();
+      $permitCount += $count;
+      $stmt->close();
+    }
+  }
 }
 
 // 📢 Count announcements
@@ -111,8 +126,6 @@ $stmt->close();
   --radius:16px;
   --transition:0.3s ease;
 }
-
-/* ======= Base ======= */
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:"Parkinsans","Outfit","Roboto",system-ui,sans-serif;
@@ -121,7 +134,6 @@ body{
   line-height:1.6;
 }
 a{text-decoration:none;color:inherit}
-
 
 /* ======= Layout ======= */
 .container{max-width:1200px;margin:auto;padding:24px 16px}
@@ -154,7 +166,6 @@ section{margin-bottom:2rem}
 .summary-icon.events{background:var(--brand-blue)}
 .summary-icon.permits{background:var(--accent)}
 .summary-icon.announcements{background:#f59e0b}
-.summary-icon.weather{background:#0ea5e9}
 .summary-info h4{margin:0;font-size:1.05rem;color:var(--text)}
 .summary-info p{margin:0;font-size:.9rem;color:var(--muted)}
 
@@ -336,7 +347,6 @@ footer{
 </main>
 
 <footer>© 2025 Servigo Civic Portal — Designed for Residents</footer>
-
 
 <script>
 // Toggle "See More" for long descriptions
