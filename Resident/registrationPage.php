@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($stmt->execute()) {
       echo "<script>
         alert('✅ Registration successful! You can now log in.');
-        window.location.href='servigo/loginPage.php';
+        window.location.href='loginPage.php';
       </script>";
       exit;
     } else {
