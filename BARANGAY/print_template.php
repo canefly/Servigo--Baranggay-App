@@ -1,3 +1,5 @@
+<?php if(isset($_GET['print']) && $_GET['print']==1){ echo "<script>window.onload=()=>window.print();</script>"; } ?>
+
 <?php
 require_once(__DIR__."/../Database/connection.php");
 $id=intval($_GET['id']);
