@@ -1,8 +1,10 @@
-<?php 
+<?php
 require_once(__DIR__ . "/../Database/session-checker.php");
 requireRole("resident");
 require_once(__DIR__ . "/../Database/connection.php");
-include 'Components/topbar.php';
+require_once(__DIR__ . "/../Database/verification-checker.php");
+
+requireVerifiedResident($conn); // 🟩 blocks unverified/pending, allows verified
 ?>
 
 <!DOCTYPE html>
