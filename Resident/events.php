@@ -146,7 +146,7 @@ main {
 }
 .page-header i { color: var(--brand-green); font-size: 1.35rem; }
 .page-header h2 {
-  font-family: "Outfit", sans-serif;
+  font-family: "Parkinsans","Outfit","Roboto",system-ui,sans-serif;
   color: var(--brand-green);
   font-size: 1.6rem;
   font-weight: 700;
@@ -180,6 +180,7 @@ main {
 }
 
 .filter-tab {
+  font-family: "Parkinsans","Outfit","Roboto",system-ui,sans-serif;
   background: none;
   border: none;
   font-size: 1rem;

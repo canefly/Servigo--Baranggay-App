@@ -23,125 +23,232 @@ include 'Components/topbar.php';
 
 <style>
 :root {
-  --brand:#1e40af;--accent:#16a34a;--bg:#f7f9fb;
-  --text:#1e1e1e;--muted:#6b7280;--border:#e5e7eb;
+  --accent:#16a34a;
+  --bg:#fff;
+  --border:#e5e7eb;
+  --brand:#1e40af;
+  --muted:#6b7280;
   --radius:14px;
+  --text:#1e1e1e;
 }
+
+/* Base */
 body {
   background:var(--bg);
-  font-family:"Parkinsans", "Outfit", sans-serif;
   color:var(--text);
+  font-family:"Parkinsans","Outfit",sans-serif;
   margin:0;
-}
-.container-custom {
-  max-width:1280px;
-  margin:auto;
-  padding:24px 18px;
+  padding:0;
 }
 
+/* Wrapper */
+.wrapper {
+  display:flex;
+  flex-direction:column;
+  overflow-x:hidden;
+  width:100%;
+}
 
-/* Hero */
-.hero {text-align:center;margin:40px 0;}
+/* Header / Hero Row */
+.header-full {
+  align-items:flex-start;
+  display:flex;
+  flex-wrap:wrap;
+  gap:24px;
+  justify-content:space-between;
+  padding:40px 6vw 20px;
+  width:100%;
+}
+
+/* Hero Left */
+.hero {
+  flex:1 1 600px;
+}
 .hero h1 {
-  font-family:"Outfit";font-weight:700;
-  color:var(--brand);font-size:2rem;
+  color:var(--brand);
+  font-family:"Outfit";
+  font-size:2.3rem;
+  font-weight:700;
+  margin-bottom:6px;
 }
 .hero p {
-  color:var(--muted);max-width:580px;
-  margin:8px auto;font-size:1rem;
+  color:var(--muted);
+  font-size:1rem;
+  margin-bottom:18px;
+  max-width:500px;
 }
-
-/* Search */
 .search-box {
-  display:flex;gap:10px;justify-content:center;
-  flex-wrap:wrap;margin-bottom:28px;
+  align-items:center;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
 }
 .search-box input {
-  flex:1;min-width:220px;max-width:400px;
-  padding:10px 14px;border-radius:10px;
-  border:1px solid var(--border);font-size:.95rem;
+  border:1px solid var(--border);
+  border-radius:10px;
+  flex:1;
+  font-size:.95rem;
+  max-width:320px;
+  min-width:200px;
+  padding:10px 14px;
 }
+
+/* Apply Right */
+.apply-section {
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:0 3px 10px rgba(0,0,0,.08);
+  flex:0 0 360px;
+  padding:24px 26px;
+  text-align:center;
+}
+.apply-section h2 {
+  align-items:center;
+  color:var(--brand);
+  display:flex;
+  font-family:"Outfit";
+  font-size:1.1rem;
+  font-weight:700;
+  gap:6px;
+  justify-content:center;
+  margin-bottom:6px;
+}
+.apply-section p {
+  color:var(--muted);
+  font-size:.9rem;
+  margin-bottom:12px;
+}
+
+/* Buttons */
 .btn-gradient {
   background:linear-gradient(135deg,var(--brand),var(--accent));
-  color:#fff;font-weight:600;
-  border:none;border-radius:10px;
-  padding:10px 16px;transition:.2s;
+  border:none;
+  border-radius:10px;
+  color:#fff;
+  font-weight:600;
+  padding:10px 16px;
+  transition:.2s;
 }
 .btn-gradient:hover {opacity:.9;}
-.bx {vertical-align:-0.15em;margin-right:6px;}
+.bx {margin-right:6px;vertical-align:-0.15em;}
+
+/* Store Grid — Centered Alignment */
+.store-grid {
+  display:grid;
+  gap:24px;
+  justify-content:center;
+  grid-template-columns:repeat(auto-fit,minmax(280px,300px));
+  margin:0 auto;
+  padding:20px 6vw 60px;
+  width:100%;
+}
 
 /* Cards */
 .card {
   border:1px solid var(--border);
   border-radius:var(--radius);
   box-shadow:0 2px 8px rgba(0,0,0,.05);
-  transition:transform .15s ease, box-shadow .15s ease;
+  transition:box-shadow .15s ease,transform .15s ease;
 }
-.card:hover {transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1);}
+.card:hover {
+  box-shadow:0 4px 12px rgba(0,0,0,.1);
+  transform:translateY(-2px);
+}
 .card-body h5 {
-  color:var(--brand);font-weight:600;
+  color:var(--brand);
   font-family:"Outfit";
+  font-weight:600;
 }
-.card-text {color:var(--muted);font-size:.95rem;}
+.card-text {
+  color:var(--muted);
+  font-size:.95rem;
+}
 .tag {
-  display:inline-block;padding:3px 9px;
-  font-size:.8rem;background:rgba(30,64,175,.08);
-  border-radius:8px;color:var(--brand);
+  background:rgba(30,64,175,.08);
+  border-radius:8px;
+  color:var(--brand);
+  display:inline-block;
+  font-size:.8rem;
+  padding:3px 9px;
 }
-
-/* Apply Section */
-.apply-section {
-  background:#fff;padding:32px;border-radius:var(--radius);
-  border:1px solid var(--border);box-shadow:0 3px 10px rgba(0,0,0,.04);
-  text-align:center;margin:60px auto 40px;max-width:700px;
-}
-.apply-section h2 {
-  color:var(--brand);font-family:"Outfit";font-weight:700;
-}
-.apply-section p {color:var(--muted);}
 
 /* Footer */
 footer {
-  background:#f9fafb;border-top:1px solid var(--border);
-  text-align:center;color:var(--muted);
-  padding:18px;font-size:.9rem;
+  color:var(--muted);
+  font-size:.9rem;
+  padding:20px;
+  text-align:center;
+  width:100%;
 }
 
 /* Toast */
 .toast {
-  position:fixed;bottom:20px;right:20px;
-  background:#111;color:#fff;
-  padding:12px 18px;border-radius:10px;
+  background:#111;
+  border-radius:10px;
+  bottom:20px;
   box-shadow:0 6px 18px rgba(0,0,0,.25);
-  font-weight:600;opacity:1;transition:opacity .3s;
+  color:#fff;
+  font-weight:600;
+  opacity:1;
+  padding:12px 18px;
+  position:fixed;
+  right:20px;
+  transition:opacity .3s;
   z-index:3000;
+}
+
+/* 🧩 Mobile Fix — Remove space completely */
+@media (max-width:992px){
+  .header-full {
+    display:block;        /* force vertical stacking, no flex gap */
+    padding:24px 24px 0;
+    text-align:center;
+  }
+  .hero {
+    margin-bottom:0;      /* no extra spacing */
+    padding-bottom:0;
+  }
+  .hero p {
+    margin:auto;
+    margin-bottom:12px;
+  }
+  .apply-section {
+    flex:unset;
+    margin:10px auto 0;
+    max-width:90%;
+  }
 }
 </style>
 </head>
 
 <body>
+<div class="wrapper">
 
-<div class="container-custom">
-  <section class="hero">
-    <h1>Barangay Stores & Services</h1>
-    <p>Discover verified local shops and trusted home services within your barangay.</p>
-  </section>
+  <!-- Hero + Apply -->
+  <div class="header-full">
+    <section class="hero">
+      <h1>Barangay Stores & Services</h1>
+      <p>Discover verified local shops and trusted home services within your barangay.</p>
+      <div class="search-box">
+        <input type="text" id="searchStore" placeholder="Search store or service...">
+        <button class="btn-gradient" onclick="filterStores()"><i class='bx bx-search'></i>Search</button>
+      </div>
+    </section>
 
-  <div class="search-box">
-    <input type="text" id="searchStore" placeholder="Search store or service...">
-    <button class="btn-gradient" onclick="filterStores()"><i class='bx bx-search'></i>Search</button>
+    <section class="apply-section">
+      <h2><i class='bx bx-store-alt'></i> Want your store listed?</h2>
+      <p>Be part of the barangay’s verified directory and reach more residents.</p>
+      <button class="btn-gradient mt-2" onclick="openApply()">✨ Apply Now</button>
+    </section>
   </div>
 
-  <div class="row g-3" id="storeGrid"></div>
+  <!-- Store Grid -->
+  <div class="store-grid" id="storeGrid"></div>
 
-  <section class="apply-section mt-5">
-    <h2><i class='bx bx-store-alt'></i> Want your store listed?</h2>
-    <p>Be part of the barangay’s verified directory and reach more residents.</p>
-    <button class="btn-gradient mt-2" onclick="openApply()">✨ Apply Now</button>
-  </section>
+  <footer>© 2025 Servigo. All rights reserved.</footer>
+
 </div>
-
-<footer>© 2025 Servigo. All rights reserved.</footer>
 
 <!-- Apply Modal -->
 <div class="modal fade" id="applyModal" tabindex="-1">
@@ -186,16 +293,15 @@ footer {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 const stores=[
-  {name:"Aling Nena’s Sari-Sari Store",desc:"Everyday essentials at affordable prices.",tag:"Retail",address:"Purok 3, Barangay San Isidro"},
-  {name:"Kuyas Barbershop",desc:"Trusted local barbers for all ages.",tag:"Services",address:"Purok 4, Barangay San Isidro"},
-  {name:"Electrician Mike",desc:"Barangay-certified electrical repairs and setup.",tag:"Home Repair",address:"Covers San Isidro & nearby puroks"}
+  {name:"Aling Nena’s Sari-Sari Store",desc:"Everyday essentials at affordable prices.",tag:"Retail"},
+  {name:"Kuyas Barbershop",desc:"Trusted local barbers for all ages.",tag:"Services"},
+  {name:"Electrician Mike",desc:"Barangay-certified electrical repairs and setup.",tag:"Home Repair"}
 ];
 
 const grid=document.getElementById('storeGrid');
 stores.forEach(s=>{
-  const col=document.createElement('div');
-  col.className='col-md-4 col-sm-6';
-  col.innerHTML=`
+  const div=document.createElement('div');
+  div.innerHTML=`
   <div class="card h-100">
     <div class="card-body d-flex flex-column justify-content-between">
       <div>
@@ -206,7 +312,7 @@ stores.forEach(s=>{
       <button class="btn-gradient mt-3"><i class='bx bx-info-circle'></i>View Details</button>
     </div>
   </div>`;
-  grid.appendChild(col);
+  grid.appendChild(div);
 });
 
 function filterStores(){
@@ -215,7 +321,6 @@ function filterStores(){
     c.parentElement.style.display=c.innerText.toLowerCase().includes(term)?'block':'none';
   });
 }
-
 function openApply(){
   new bootstrap.Modal(document.getElementById('applyModal')).show();
 }
@@ -226,7 +331,8 @@ function submitApplication(e){
 }
 function showToast(msg){
   const t=document.createElement('div');
-  t.className='toast';t.textContent=msg;
+  t.className='toast';
+  t.textContent=msg;
   document.body.appendChild(t);
   setTimeout(()=>{t.style.opacity='0'},1800);
   setTimeout(()=>t.remove(),2100);
