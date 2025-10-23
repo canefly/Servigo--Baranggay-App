@@ -2,11 +2,27 @@
 require_once(__DIR__ . "/../Database/session-checker.php");
 requireRole("resident");
 require_once(__DIR__ . "/../Database/connection.php");
-
 include 'Components/topbar.php';
 
-?>
+$resident_id = $_SESSION['sg_id'] ?? null;
+$barangay    = $_SESSION['sg_brgy'] ?? 'Unknown Barangay';
 
+/* ===============================
+   FETCH APPROVED + ACTIVE STORES
+================================= */
+$stmt = $conn->prepare("
+  SELECT store_name, address, open_hours, contact, classification, category AS service_type, photo_url, is_closed_today, is_closed_forever
+  FROM barangay_services
+  WHERE barangay_name=? 
+    AND status='Approved'
+    AND (is_closed_forever=0 OR is_closed_forever IS NULL)
+  ORDER BY submitted_at DESC
+");
+$stmt->bind_param("s", $barangay);
+$stmt->execute();
+$stores = $stmt->get_result();
+$stmt->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,8 +35,7 @@ include 'Components/topbar.php';
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300..700&family=Parkinsans:wght@300..700&display=swap" rel="stylesheet">
 
-<!-- Bootstrap & Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Icons -->
 <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
 <style>
@@ -33,8 +48,6 @@ include 'Components/topbar.php';
   --radius:14px;
   --text:#1e1e1e;
 }
-
-/* Base */
 body {
   background:var(--bg);
   color:var(--text);
@@ -42,16 +55,7 @@ body {
   margin:0;
   padding:0;
 }
-
-/* Wrapper */
-.wrapper {
-  display:flex;
-  flex-direction:column;
-  overflow-x:hidden;
-  width:100%;
-}
-
-/* Header / Hero Row */
+.wrapper {display:flex;flex-direction:column;overflow-x:hidden;width:100%;}
 .header-full {
   align-items:flex-start;
   display:flex;
@@ -61,30 +65,10 @@ body {
   padding:40px 6vw 20px;
   width:100%;
 }
-
-/* Hero Left */
-.hero {
-  flex:1 1 600px;
-}
-.hero h1 {
-  color:var(--brand);
-  font-family:"Outfit";
-  font-size:2.3rem;
-  font-weight:700;
-  margin-bottom:6px;
-}
-.hero p {
-  color:var(--muted);
-  font-size:1rem;
-  margin-bottom:18px;
-  max-width:500px;
-}
-.search-box {
-  align-items:center;
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
+.hero {flex:1 1 600px;}
+.hero h1 {color:var(--brand);font-size:2.3rem;font-weight:700;margin-bottom:6px;}
+.hero p {color:var(--muted);font-size:1rem;margin-bottom:18px;max-width:500px;}
+.search-box {align-items:center;display:flex;flex-wrap:wrap;gap:10px;}
 .search-box input {
   border:1px solid var(--border);
   border-radius:10px;
@@ -94,8 +78,12 @@ body {
   min-width:200px;
   padding:10px 14px;
 }
-
-/* Apply Right */
+.btn-gradient {
+  background:linear-gradient(135deg,var(--brand),var(--accent));
+  border:none;border-radius:10px;color:#fff;
+  font-weight:600;padding:10px 16px;transition:.2s;cursor:pointer;
+}
+.btn-gradient:hover{opacity:.9;}
 .apply-section {
   background:#fff;
   border:1px solid var(--border);
@@ -106,36 +94,13 @@ body {
   text-align:center;
 }
 .apply-section h2 {
-  align-items:center;
   color:var(--brand);
-  display:flex;
-  font-family:"Outfit";
   font-size:1.1rem;
   font-weight:700;
-  gap:6px;
-  justify-content:center;
   margin-bottom:6px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
 }
-.apply-section p {
-  color:var(--muted);
-  font-size:.9rem;
-  margin-bottom:12px;
-}
-
-/* Buttons */
-.btn-gradient {
-  background:linear-gradient(135deg,var(--brand),var(--accent));
-  border:none;
-  border-radius:10px;
-  color:#fff;
-  font-weight:600;
-  padding:10px 16px;
-  transition:.2s;
-}
-.btn-gradient:hover {opacity:.9;}
-.bx {margin-right:6px;vertical-align:-0.15em;}
-
-/* Store Grid — Centered Alignment */
+.apply-section p {color:var(--muted);font-size:.9rem;margin-bottom:12px;}
 .store-grid {
   display:grid;
   gap:24px;
@@ -145,27 +110,30 @@ body {
   padding:20px 6vw 60px;
   width:100%;
 }
-
-/* Cards */
 .card {
   border:1px solid var(--border);
   border-radius:var(--radius);
   box-shadow:0 2px 8px rgba(0,0,0,.05);
+  overflow:hidden;
+  background:#fff;
+  position:relative;
   transition:box-shadow .15s ease,transform .15s ease;
 }
-.card:hover {
-  box-shadow:0 4px 12px rgba(0,0,0,.1);
-  transform:translateY(-2px);
-}
-.card-body h5 {
-  color:var(--brand);
-  font-family:"Outfit";
+.card:hover {box-shadow:0 4px 12px rgba(0,0,0,.1);transform:translateY(-2px);}
+.card img {width:100%;height:180px;object-fit:cover;border-bottom:1px solid var(--border);}
+.closed-banner {
+  position:absolute;
+  top:10px;left:10px;
+  background:rgba(220,38,38,.9);
+  color:#fff;
   font-weight:600;
+  padding:4px 10px;
+  border-radius:8px;
+  font-size:.85rem;
 }
-.card-text {
-  color:var(--muted);
-  font-size:.95rem;
-}
+.card-body {padding:14px 16px;}
+.card-body h5 {color:var(--brand);font-weight:600;font-size:1.05rem;margin:0 0 4px;}
+.card-text {color:var(--muted);font-size:.9rem;margin-bottom:6px;}
 .tag {
   background:rgba(30,64,175,.08);
   border-radius:8px;
@@ -173,53 +141,13 @@ body {
   display:inline-block;
   font-size:.8rem;
   padding:3px 9px;
+  margin-right:4px;
 }
-
-/* Footer */
-footer {
-  color:var(--muted);
-  font-size:.9rem;
-  padding:20px;
-  text-align:center;
-  width:100%;
-}
-
-/* Toast */
-.toast {
-  background:#111;
-  border-radius:10px;
-  bottom:20px;
-  box-shadow:0 6px 18px rgba(0,0,0,.25);
-  color:#fff;
-  font-weight:600;
-  opacity:1;
-  padding:12px 18px;
-  position:fixed;
-  right:20px;
-  transition:opacity .3s;
-  z-index:3000;
-}
-
-/* 🧩 Mobile Fix — Remove space completely */
+footer {color:var(--muted);font-size:.9rem;padding:20px;text-align:center;width:100%;}
 @media (max-width:992px){
-  .header-full {
-    display:block;        /* force vertical stacking, no flex gap */
-    padding:24px 24px 0;
-    text-align:center;
-  }
-  .hero {
-    margin-bottom:0;      /* no extra spacing */
-    padding-bottom:0;
-  }
-  .hero p {
-    margin:auto;
-    margin-bottom:12px;
-  }
-  .apply-section {
-    flex:unset;
-    margin:10px auto 0;
-    max-width:90%;
-  }
+  .header-full {display:block;padding:24px 24px 0;text-align:center;}
+  .hero p {margin:auto;margin-bottom:12px;}
+  .apply-section {flex:unset;margin:10px auto 0;max-width:90%;}
 }
 </style>
 </head>
@@ -241,103 +169,51 @@ footer {
     <section class="apply-section">
       <h2><i class='bx bx-store-alt'></i> Want your store listed?</h2>
       <p>Be part of the barangay’s verified directory and reach more residents.</p>
-      <button class="btn-gradient mt-2" onclick="openApply()">✨ Apply Now</button>
+      <a href="myStore.php" style="text-decoration:none;">
+        <button class="btn-gradient mt-2">✨ Apply Now</button>
+      </a>
     </section>
   </div>
 
   <!-- Store Grid -->
-  <div class="store-grid" id="storeGrid"></div>
-
-  <footer>© 2025 Servigo. All rights reserved.</footer>
-
-</div>
-
-<!-- Apply Modal -->
-<div class="modal fade" id="applyModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <form class="modal-content" onsubmit="submitApplication(event)">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold text-primary"><i class='bx bx-edit-alt'></i> Store Application</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3"><label class="form-label"><i class='bx bx-store'></i> Store Name</label><input required class="form-control" placeholder="Maria’s Laundry Service"></div>
-        <div class="mb-3"><label class="form-label"><i class='bx bx-map'></i> Address</label><input required class="form-control" placeholder="Purok 3, Barangay San Isidro"></div>
-        <div class="mb-3"><label class="form-label"><i class='bx bx-time-five'></i> Open Hours</label><input required class="form-control" placeholder="Mon–Sat 8:00 AM – 6:00 PM"></div>
-        <div class="mb-3"><label class="form-label"><i class='bx bx-phone'></i> Contact</label><input required type="tel" class="form-control" placeholder="0912 345 6789"></div>
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label"><i class='bx bx-id-card'></i> Classification</label>
-            <select class="form-select" required>
-              <option value="">Select classification</option>
-              <option value="licensed">Licensed Business</option>
-              <option value="informal">Barangay-Approved</option>
-            </select>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label"><i class='bx bx-cog'></i> Service Type</label>
-            <select class="form-select" required>
-              <option value="">Select type</option>
-              <option value="fixed">Fixed Location</option>
-              <option value="home">Home Service</option>
-            </select>
-          </div>
+  <div class="store-grid" id="storeGrid">
+    <?php if($stores->num_rows): while($s=$stores->fetch_assoc()): ?>
+      <div class="card">
+        <?php if($s['photo_url']): ?>
+          <img src="../<?= htmlspecialchars($s['photo_url']) ?>" alt="Store photo">
+        <?php else: ?>
+          <img src="../uploads/default_store.jpg" alt="No photo">
+        <?php endif; ?>
+        <?php if($s['is_closed_today']): ?>
+          <div class="closed-banner">Closed Today</div>
+        <?php endif; ?>
+        <div class="card-body">
+          <h5><?= htmlspecialchars($s['store_name']) ?></h5>
+          <p class="card-text"><i class='bx bx-map'></i> <?= htmlspecialchars($s['address']) ?></p>
+          <p class="card-text"><i class='bx bx-time-five'></i> <?= htmlspecialchars($s['open_hours']) ?></p>
+          <p class="card-text"><i class='bx bx-phone'></i> <?= htmlspecialchars($s['contact']) ?></p>
+          <span class="tag">
+            <?= strtolower($s['classification'])=='licensed'?'📄 Licensed Business':'🏠 Barangay-Approved' ?>
+          </span>
+          <span class="tag">
+            <?= strtolower($s['service_type'])=='home'?'🚗 Home Service':'🏪 Fixed Location' ?>
+          </span>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn-gradient">Submit</button>
-      </div>
-    </form>
+    <?php endwhile; else: ?>
+      <p style="color:var(--muted);text-align:center;">No approved services yet in your barangay.</p>
+    <?php endif; ?>
   </div>
+
+  <footer>© 2025 Servigo. All rights reserved.</footer>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-const stores=[
-  {name:"Aling Nena’s Sari-Sari Store",desc:"Everyday essentials at affordable prices.",tag:"Retail"},
-  {name:"Kuyas Barbershop",desc:"Trusted local barbers for all ages.",tag:"Services"},
-  {name:"Electrician Mike",desc:"Barangay-certified electrical repairs and setup.",tag:"Home Repair"}
-];
-
-const grid=document.getElementById('storeGrid');
-stores.forEach(s=>{
-  const div=document.createElement('div');
-  div.innerHTML=`
-  <div class="card h-100">
-    <div class="card-body d-flex flex-column justify-content-between">
-      <div>
-        <h5>${s.name}</h5>
-        <p class="card-text">${s.desc}</p>
-        <span class="tag">${s.tag}</span>
-      </div>
-      <button class="btn-gradient mt-3"><i class='bx bx-info-circle'></i>View Details</button>
-    </div>
-  </div>`;
-  grid.appendChild(div);
-});
-
 function filterStores(){
   const term=document.getElementById('searchStore').value.toLowerCase();
-  document.querySelectorAll('#storeGrid .card').forEach(c=>{
-    c.parentElement.style.display=c.innerText.toLowerCase().includes(term)?'block':'none';
+  document.querySelectorAll('.store-grid .card').forEach(c=>{
+    c.style.display=c.innerText.toLowerCase().includes(term)?'block':'none';
   });
-}
-function openApply(){
-  new bootstrap.Modal(document.getElementById('applyModal')).show();
-}
-function submitApplication(e){
-  e.preventDefault();
-  bootstrap.Modal.getInstance(document.getElementById('applyModal')).hide();
-  showToast("✅ Application submitted for barangay review.");
-}
-function showToast(msg){
-  const t=document.createElement('div');
-  t.className='toast';
-  t.textContent=msg;
-  document.body.appendChild(t);
-  setTimeout(()=>{t.style.opacity='0'},1800);
-  setTimeout(()=>t.remove(),2100);
 }
 </script>
 </body>

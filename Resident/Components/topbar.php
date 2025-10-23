@@ -184,6 +184,7 @@ nav .profile-section p{color:var(--muted);font-size:.9rem;}
   <a href="./events.php"><i class="bi bi-calendar-event-fill"></i> Events</a>
   <a href="./storesPage.php"><i class="bi bi-shop"></i> Stores</a>
   <a href="./myRequest.php"><i class="bi bi-envelope-fill"></i> My Request</a>
+  <a href="./myStore.php"><i class="bi bi-shield-check"></i> My Store</a>
   <hr style="border:none;border-top:1px solid #e5e7eb;margin:.8rem 0;">
   <h4 style="padding:0 1.5rem;margin-top:.5rem;color:var(--muted);font-size:.85rem;text-transform:uppercase;">Account</h4>
   <a href="./verifyAccount.php"><i class="bi bi-shield-check"></i> Verify Account</a>
