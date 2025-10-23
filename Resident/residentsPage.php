@@ -2,10 +2,9 @@
 require_once(__DIR__ . "/../Database/session-checker.php");
 requireRole("resident");
 require_once(__DIR__ . "/../Database/connection.php");
-require_once(__DIR__ . "/../Database/verification-checker.php");
+
 include 'Components/topbar.php';
 
-requireVerifiedResident($conn); // 🟩 blocks unverified/pending, allows verified
 
 $resident_id = $_SESSION['sg_id'] ?? null;
 $barangay    = $_SESSION['sg_brgy'] ?? 'Unknown Barangay';
