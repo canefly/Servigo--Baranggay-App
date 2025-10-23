@@ -180,7 +180,7 @@ nav .profile-section p{color:var(--muted);font-size:.9rem;}
   <h4 style="padding:0 1.5rem;margin-top:1rem;color:var(--muted);font-size:.85rem;text-transform:uppercase;">Pages</h4>
   <a href="./residentsPage.php"><i class="bi bi-people-fill"></i> Residents</a>
   <a href="./permitsPage.php"><i class="bi bi-file-earmark-text-fill"></i> Permits</a>
-  <a href="./registrationPage.php"><i class="bi bi-person-plus-fill"></i> Registration</a>
+  <a href="./FeedbackPage.php"><i class="bi bi-person-plus-fill"></i> Feedback</a>
   <a href="./events.php"><i class="bi bi-calendar-event-fill"></i> Events</a>
   <a href="./storesPage.php"><i class="bi bi-shop"></i> Stores</a>
   <a href="./myRequest.php"><i class="bi bi-envelope-fill"></i> My Request</a>

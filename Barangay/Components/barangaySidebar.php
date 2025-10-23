@@ -107,7 +107,7 @@
       <li><a href="requests.php"><i class='bx bx-file'></i><span> Requests</span></a></li>
       <li><a href="barangayAnnouncements.php"><i class='bx bx-list-plus'></i><span> Announcements</span></a></li>
       <li><a href="verification.php"><i class='bx bx-id-card'></i><span> Verification Status</span></a></li>
-      <li><a href="barangaySuggest.php"><i class='bx bx-file'></i><span> Concern/Suggestion</span></a></li>
+      <li><a href="feedbackRequests.php"><i class='bx bx-file'></i><span> Concern/Suggestion</span></a></li>
       <li><a href="adminEvents.php"><i class='bx bx-file'></i><span> Events</span></a></li>
       <li><a href="store.php"><i class='bx bx-cog'></i><span> Store</span></a></li>
       <li><a href="../Database/logout.php"><i class='bx bx-log-out'></i><span> Logout</span></a></li>
