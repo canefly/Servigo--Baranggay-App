@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 23, 2025 at 04:21 AM
+-- Generation Time: Oct 23, 2025 at 04:39 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -126,6 +126,34 @@ CREATE TABLE `barangay_events` (
   `linked_announcement_id` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `barangay_facilities`
+--
+
+CREATE TABLE `barangay_facilities` (
+  `id` int(11) NOT NULL,
+  `barangay_name` varchar(255) NOT NULL,
+  `facility_name` varchar(255) NOT NULL,
+  `type_primary` varchar(100) DEFAULT NULL,
+  `type_secondary` varchar(100) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `status` enum('Good Condition','Closed','Under Maintenance') DEFAULT 'Good Condition',
+  `photo_url` varchar(255) DEFAULT NULL,
+  `contact_person` varchar(255) DEFAULT NULL,
+  `contact_number` varchar(50) DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `barangay_facilities`
+--
+
+INSERT INTO `barangay_facilities` (`id`, `barangay_name`, `facility_name`, `type_primary`, `type_secondary`, `address`, `status`, `photo_url`, `contact_person`, `contact_number`, `remarks`, `created_at`) VALUES
+(1, 'Barangay Debugon', 'Banayad Court', 'Covered Court', 'Evacuation Center', 'Mabini Street', 'Good Condition', 'uploads/facilities/1761185243_court.jpg', NULL, NULL, NULL, '2025-10-23 10:07:23');
 
 -- --------------------------------------------------------
 
@@ -566,6 +594,13 @@ ALTER TABLE `barangay_events`
   ADD KEY `linked_announcement_id` (`linked_announcement_id`);
 
 --
+-- Indexes for table `barangay_facilities`
+--
+ALTER TABLE `barangay_facilities`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_barangay_type` (`barangay_name`);
+
+--
 -- Indexes for table `barangay_feedback`
 --
 ALTER TABLE `barangay_feedback`
@@ -703,6 +738,12 @@ ALTER TABLE `barangay_clearance_requests`
 --
 ALTER TABLE `barangay_events`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `barangay_facilities`
+--
+ALTER TABLE `barangay_facilities`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `barangay_feedback`
