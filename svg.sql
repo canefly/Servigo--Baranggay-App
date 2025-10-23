@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 23, 2025 at 03:03 AM
+-- Generation Time: Oct 23, 2025 at 04:21 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -126,6 +126,31 @@ CREATE TABLE `barangay_events` (
   `linked_announcement_id` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `barangay_feedback`
+--
+
+CREATE TABLE `barangay_feedback` (
+  `id` int(11) NOT NULL,
+  `resident_id` int(11) NOT NULL,
+  `barangay_name` varchar(255) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `category` enum('Concern','Suggestion') NOT NULL,
+  `status` enum('Pending','Resolved') DEFAULT 'Pending',
+  `admin_reply` text DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `barangay_feedback`
+--
+
+INSERT INTO `barangay_feedback` (`id`, `resident_id`, `barangay_name`, `subject`, `message`, `category`, `status`, `admin_reply`, `created_at`) VALUES
+(1, 1, 'Barangay Debugon', 'MAINGAY NA KAPIT BAHAY', 'ang ingay nila madaling araw na nag kakantuhan pa', 'Concern', 'Resolved', 'oki', '2025-10-23 10:15:35');
 
 -- --------------------------------------------------------
 
@@ -330,7 +355,8 @@ INSERT INTO `notifications` (`id`, `barangay_name`, `recipient_type`, `recipient
 (2, 'Barangay Debugon', 'resident', 1, 'barangay_services', 1, 'service_review', '✅ Service Approved', 'Your store <b>Diyata Pares Overlud</b> has been approved by the barangay.', NULL, 1, '2025-10-23 07:27:56'),
 (3, 'Barangay Debugon', 'admin', NULL, 'barangay_services', 2, 'service_submission', 'New Service Application', 'Bulalo ni tanggol has been submitted for barangay approval.', NULL, 0, '2025-10-23 07:38:42'),
 (4, 'Barangay Debugon', 'resident', 1, 'barangay_services', 1, 'service_review', '✅ Service Approved', 'Your store <b>Diyata Pares Overlud</b> has been approved by the barangay.', NULL, 1, '2025-10-23 08:36:07'),
-(5, 'Barangay Debugon', 'resident', 1, 'barangay_services', 1, 'service_review', '✅ Store Approved', 'Your store <b>Diyata Pares Overlud</b> has been approved by the barangay.', NULL, 0, '2025-10-23 09:01:22');
+(5, 'Barangay Debugon', 'resident', 1, 'barangay_services', 1, 'service_review', '✅ Store Approved', 'Your store <b>Diyata Pares Overlud</b> has been approved by the barangay.', NULL, 1, '2025-10-23 09:01:22'),
+(6, 'Barangay Debugon', 'resident', 1, NULL, NULL, 'feedback_reply', 'Barangay replied to your feedback', 'Your feedback titled \'MAINGAY NA KAPIT BAHAY\' has been replied to by the barangay.', '/Resident/feedbackPage.php', 1, '2025-10-23 10:15:58');
 
 -- --------------------------------------------------------
 
@@ -540,6 +566,12 @@ ALTER TABLE `barangay_events`
   ADD KEY `linked_announcement_id` (`linked_announcement_id`);
 
 --
+-- Indexes for table `barangay_feedback`
+--
+ALTER TABLE `barangay_feedback`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `barangay_services`
 --
 ALTER TABLE `barangay_services`
@@ -673,6 +705,12 @@ ALTER TABLE `barangay_events`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `barangay_feedback`
+--
+ALTER TABLE `barangay_feedback`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `barangay_services`
 --
 ALTER TABLE `barangay_services`
@@ -718,7 +756,7 @@ ALTER TABLE `norecord_requests`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `ojt_requests`
